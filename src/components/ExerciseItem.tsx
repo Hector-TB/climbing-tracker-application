@@ -22,13 +22,11 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({ exercise, onToggleComplete 
     return details.join(' • ');
   };
 
+  const hasExpandableContent = !!(exercise.notes || exercise.rest);
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.mainContent}
-        onPress={() => setExpanded(!expanded)}
-        activeOpacity={0.7}
-      >
+      <View style={styles.mainContent}>
         <TouchableOpacity
           style={styles.checkbox}
           onPress={() => onToggleComplete(exercise.id)}
@@ -41,23 +39,31 @@ const ExerciseItem: React.FC<ExerciseItemProps> = ({ exercise, onToggleComplete 
           )}
         </TouchableOpacity>
 
-        <View style={styles.textContainer}>
+        <TouchableOpacity
+          style={styles.textContainer}
+          onPress={() => hasExpandableContent && setExpanded(!expanded)}
+          activeOpacity={hasExpandableContent ? 0.7 : 1}
+        >
           <Text style={[styles.name, exercise.completed && styles.completedText]}>
             {exercise.name}
           </Text>
           {renderDetails() && (
             <Text style={styles.details}>{renderDetails()}</Text>
           )}
-        </View>
+        </TouchableOpacity>
 
-        <Ionicons
-          name={expanded ? 'chevron-up' : 'chevron-down'}
-          size={20}
-          color={colors.textMuted}
-        />
-      </TouchableOpacity>
+        {hasExpandableContent && (
+          <TouchableOpacity onPress={() => setExpanded(!expanded)} activeOpacity={0.7}>
+            <Ionicons
+              name={expanded ? 'chevron-up' : 'chevron-down'}
+              size={20}
+              color={colors.textMuted}
+            />
+          </TouchableOpacity>
+        )}
+      </View>
 
-      {expanded && (exercise.notes || exercise.rest) && (
+      {expanded && hasExpandableContent && (
         <View style={styles.expandedContent}>
           {exercise.notes && (
             <View style={styles.noteContainer}>
