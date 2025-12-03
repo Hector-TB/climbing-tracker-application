@@ -22,7 +22,6 @@ const LogsScreen: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Daily Metrics State
-  const [gripStrength, setGripStrength] = useState('');
   const [elbowPainWarmup, setElbowPainWarmup] = useState(0);
   const [elbowPainClimbing, setElbowPainClimbing] = useState(0);
   const [elbowPainLockoffs, setElbowPainLockoffs] = useState(0);
@@ -54,7 +53,6 @@ const LogsScreen: React.FC = () => {
     const dateString = format(selectedDate, 'yyyy-MM-dd');
     const metrics = await getDailyMetrics(dateString);
     if (metrics) {
-      setGripStrength(metrics.gripStrength?.toString() || '');
       setElbowPainWarmup(metrics.elbowPainWarmup || 0);
       setElbowPainClimbing(metrics.elbowPainClimbing || 0);
       setElbowPainLockoffs(metrics.elbowPainLockoffs || 0);
@@ -66,7 +64,6 @@ const LogsScreen: React.FC = () => {
       setNotes(metrics.notes || '');
     } else {
       // Reset to defaults
-      setGripStrength('');
       setElbowPainWarmup(0);
       setElbowPainClimbing(0);
       setElbowPainLockoffs(0);
@@ -103,7 +100,6 @@ const LogsScreen: React.FC = () => {
     const dateString = format(selectedDate, 'yyyy-MM-dd');
     const metrics: DailyMetrics = {
       date: dateString,
-      gripStrength: gripStrength ? parseFloat(gripStrength) : undefined,
       elbowPainWarmup,
       elbowPainClimbing,
       elbowPainLockoffs,
@@ -301,18 +297,6 @@ const LogsScreen: React.FC = () => {
         <View style={styles.sectionHeader}>
           <Ionicons name="pulse" size={24} color={colors.primary} />
           <Text style={styles.sectionTitle}>Daily Health Metrics</Text>
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Grip Strength (baseline tracking)</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Enter grip strength reading"
-            placeholderTextColor={colors.textMuted}
-            value={gripStrength}
-            onChangeText={setGripStrength}
-            keyboardType="numeric"
-          />
         </View>
 
         <Text style={styles.subsectionTitle}>Elbow Pain (0-10 scale)</Text>

@@ -321,7 +321,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ route, navigation }) => {
 
       <View style={styles.bottomActions}>
         <Button
-          title="Save Progress"
+          title="Save"
           onPress={handleSaveWorkout}
           variant="outline"
           style={styles.saveButton}

@@ -41,7 +41,6 @@ export interface WorkoutDay {
 
 export interface DailyMetrics {
   date: string; // ISO date string
-  gripStrength?: number;
   elbowPainWarmup?: number; // 0-10
   elbowPainClimbing?: number; // 0-10
   elbowPainLockoffs?: number; // 0-10
