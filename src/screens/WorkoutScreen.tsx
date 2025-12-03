@@ -75,7 +75,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ route, navigation }) => {
       weekNumber,
       completed: isComplete,
       exercises: updatedExercises,
-      usedLowEnergy,
+      usedLowEnergy: useLowEnergy,
     };
 
     console.log('Auto-saving workout:', workoutLog);
@@ -111,7 +111,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ route, navigation }) => {
         weekNumber,
         completed: isComplete,
         exercises,
-        usedLowEnergy,
+        usedLowEnergy: useLowEnergy,
       };
 
       console.log('Saving workout:', workoutLog);
@@ -163,7 +163,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ route, navigation }) => {
         weekNumber,
         completed: true,
         exercises: exercises.map(ex => ({ ...ex, completed: true })),
-        usedLowEnergy,
+        usedLowEnergy: useLowEnergy,
       };
 
       console.log('Completing workout:', workoutLog);
