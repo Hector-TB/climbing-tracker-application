@@ -19,9 +19,8 @@ import { format, subDays, parseISO } from 'date-fns';
 const screenWidth = Dimensions.get('window').width - spacing.md * 2;
 
 const ProgressScreen: React.FC = () => {
-  const [selectedMetric, setSelectedMetric] = useState<'elbow' | 'grip' | 'recovery'>('elbow');
+  const [selectedMetric, setSelectedMetric] = useState<'elbow' | 'recovery'>('elbow');
   const [elbowPainData, setElbowPainData] = useState<number[]>([]);
-  const [gripStrengthData, setGripStrengthData] = useState<number[]>([]);
   const [recoveryScoreData, setRecoveryScoreData] = useState<number[]>([]);
   const [labels, setLabels] = useState<string[]>([]);
   const [weeklyStats, setWeeklyStats] = useState({
@@ -64,13 +63,6 @@ const ProgressScreen: React.FC = () => {
       return 0;
     });
     setElbowPainData(elbowData);
-
-    // Process grip strength data
-    const gripData = last7Days.map(date => {
-      const metrics = progress.dailyMetrics.find(m => m.date === date);
-      return metrics?.gripStrength || 0;
-    });
-    setGripStrengthData(gripData);
 
     // Process recovery score data
     const recoveryData = last7Days.map(date => {
@@ -141,12 +133,6 @@ const ProgressScreen: React.FC = () => {
         yAxisSuffix = '/10';
         chartColor = colors.warning;
         break;
-      case 'grip':
-        data = gripStrengthData;
-        title = 'Grip Strength Trend';
-        yAxisSuffix = '';
-        chartColor = colors.secondary;
-        break;
       case 'recovery':
         data = recoveryScoreData;
         title = 'Recovery Score Trend';
@@ -202,34 +188,40 @@ const ProgressScreen: React.FC = () => {
 
       <Card>
         <Text style={styles.cardTitle}>Weekly Summary</Text>
-        <View style={styles.statsGrid}>
-          <View style={styles.statBox}>
-            <Ionicons name="checkmark-circle" size={32} color={colors.success} />
-            <Text style={styles.statValue}>
+        <View style={styles.statsList}>
+          <View style={styles.statRow}>
+            <View style={styles.statRowLeft}>
+              <Ionicons name="checkmark-circle" size={24} color={colors.success} />
+              <Text style={styles.statRowLabel}>Workouts Completed</Text>
+            </View>
+            <Text style={styles.statRowValue}>
               {weeklyStats.workoutsCompleted}/{weeklyStats.totalWorkouts}
             </Text>
-            <Text style={styles.statLabel}>Workouts</Text>
           </View>
-          <View style={styles.statBox}>
-            <Ionicons
-              name="pulse"
-              size={32}
-              color={weeklyStats.avgElbowPain >= 6 ? colors.error : colors.warning}
-            />
+          <View style={styles.statRow}>
+            <View style={styles.statRowLeft}>
+              <Ionicons
+                name="pulse"
+                size={24}
+                color={weeklyStats.avgElbowPain >= 6 ? colors.error : colors.warning}
+              />
+              <Text style={styles.statRowLabel}>Average Elbow Pain</Text>
+            </View>
             <Text
               style={[
-                styles.statValue,
+                styles.statRowValue,
                 weeklyStats.avgElbowPain >= 6 && styles.statValueDanger,
               ]}
             >
               {weeklyStats.avgElbowPain}/10
             </Text>
-            <Text style={styles.statLabel}>Avg Elbow Pain</Text>
           </View>
-          <View style={styles.statBox}>
-            <Ionicons name="fitness" size={32} color={colors.primary} />
-            <Text style={styles.statValue}>{weeklyStats.avgRecovery}/20</Text>
-            <Text style={styles.statLabel}>Avg Recovery</Text>
+          <View style={styles.statRow}>
+            <View style={styles.statRowLeft}>
+              <Ionicons name="fitness" size={24} color={colors.primary} />
+              <Text style={styles.statRowLabel}>Average Recovery</Text>
+            </View>
+            <Text style={styles.statRowValue}>{weeklyStats.avgRecovery}/20</Text>
           </View>
         </View>
       </Card>
@@ -256,28 +248,6 @@ const ProgressScreen: React.FC = () => {
               ]}
             >
               Elbow Pain
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.metricButton,
-              selectedMetric === 'grip' && styles.metricButtonActive,
-            ]}
-            onPress={() => setSelectedMetric('grip')}
-          >
-            <Ionicons
-              name="hand-left"
-              size={20}
-              color={selectedMetric === 'grip' ? colors.white : colors.textMuted}
-            />
-            <Text
-              style={[
-                styles.metricButtonText,
-                selectedMetric === 'grip' && styles.metricButtonTextActive,
-              ]}
-            >
-              Grip Strength
             </Text>
           </TouchableOpacity>
 
@@ -344,12 +314,6 @@ const ProgressScreen: React.FC = () => {
         <View style={styles.tipItem}>
           <Text style={styles.tipBullet}>•</Text>
           <Text style={styles.tipText}>
-            If grip strength drops 15%+ from baseline, use low-energy variants
-          </Text>
-        </View>
-        <View style={styles.tipItem}>
-          <Text style={styles.tipBullet}>•</Text>
-          <Text style={styles.tipText}>
             Average elbow pain above 4/10 requires immediate attention
           </Text>
         </View>
@@ -392,31 +356,35 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: spacing.md,
   },
-  statsGrid: {
+  statsList: {
+    gap: spacing.md,
+  },
+  statRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-  },
-  statBox: {
-    flex: 1,
     alignItems: 'center',
     padding: spacing.md,
     backgroundColor: colors.backgroundLight,
     borderRadius: borderRadius.md,
-    marginHorizontal: spacing.xs,
   },
-  statValue: {
+  statRowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    flex: 1,
+  },
+  statRowLabel: {
+    fontSize: fontSize.md,
+    color: colors.text,
+    fontWeight: fontWeight.medium,
+  },
+  statRowValue: {
     fontSize: fontSize.xl,
     fontWeight: fontWeight.bold,
     color: colors.text,
-    marginVertical: spacing.xs,
   },
   statValueDanger: {
     color: colors.error,
-  },
-  statLabel: {
-    fontSize: fontSize.xs,
-    color: colors.textSecondary,
-    textAlign: 'center',
   },
   metricSelector: {
     flexDirection: 'row',

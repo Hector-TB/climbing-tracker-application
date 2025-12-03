@@ -15,6 +15,7 @@ import Card from '../components/Card';
 import PhaseIndicator from '../components/PhaseIndicator';
 import { getUserProgress, updateCurrentWeek } from '../services/storage';
 import { getPhaseInfo, weeklySchedule } from '../data/trainingPlan';
+import { startOfMonth, endOfMonth, eachDayOfInterval, format, getDay, addMonths } from 'date-fns';
 
 const PlanScreen: React.FC = () => {
   const [currentWeek, setCurrentWeek] = useState(1);
@@ -36,6 +37,84 @@ const PlanScreen: React.FC = () => {
     await updateCurrentWeek(week);
     setCurrentWeek(week);
     setModalVisible(false);
+  };
+
+  const renderMonthCalendar = (monthIndex: number) => {
+    // monthIndex: 0 = Month 1, 1 = Month 2, 2 = Month 3
+    const startDate = new Date();
+    const monthStart = addMonths(startDate, monthIndex);
+    const monthStartDate = startOfMonth(monthStart);
+    const monthEndDate = endOfMonth(monthStart);
+    const daysInMonth = eachDayOfInterval({ start: monthStartDate, end: monthEndDate });
+
+    // Calculate weeks for this month
+    const weekNumbers = monthIndex === 0 ? [1, 2, 3, 4] : monthIndex === 1 ? [5, 6, 7, 8] : [9, 10, 11, 12];
+    const phase = monthIndex === 0 ? 'Foundation' : monthIndex === 1 ? 'Power Development' : 'Peak Performance';
+
+    // Add empty cells for days before month starts
+    const startDay = getDay(monthStartDate); // 0 = Sunday
+    const emptyCells = startDay === 0 ? 0 : startDay - 1; // Adjust for Monday start
+
+    return (
+      <View style={styles.monthBlock}>
+        <View style={styles.monthHeader}>
+          <Ionicons name="calendar-outline" size={20} color={colors.primary} />
+          <Text style={styles.monthTitle}>Month {monthIndex + 1}</Text>
+        </View>
+        <Text style={styles.monthPhaseTitle}>{phase} Phase</Text>
+
+        {/* Day headers */}
+        <View style={styles.calendarHeader}>
+          {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
+            <Text key={i} style={styles.calendarDayHeader}>{day}</Text>
+          ))}
+        </View>
+
+        {/* Calendar grid */}
+        <View style={styles.calendarGrid}>
+          {/* Empty cells before month starts */}
+          {Array.from({ length: emptyCells }).map((_, i) => (
+            <View key={`empty-${i}`} style={styles.calendarDay} />
+          ))}
+
+          {/* Actual days */}
+          {daysInMonth.map((day, index) => {
+            const dayOfWeek = format(day, 'EEEE');
+            const dayNumber = format(day, 'd');
+            const weekNumber = weekNumbers[Math.floor((emptyCells + index) / 7)];
+            const isWorkoutDay = weeklySchedule.includes(dayOfWeek as any);
+            const isCurrentWeek = weekNumber === currentWeek;
+            const isDeloadWeek = weekNumber === 6;
+
+            return (
+              <TouchableOpacity
+                key={day.toISOString()}
+                style={[
+                  styles.calendarDay,
+                  styles.calendarDayActive,
+                  isCurrentWeek && styles.calendarDayCurrentWeek,
+                  isDeloadWeek && styles.calendarDayDeload,
+                ]}
+                onPress={() => isWorkoutDay && setExpandedWeek(weekNumber)}
+              >
+                <Text style={[
+                  styles.calendarDayText,
+                  isCurrentWeek && styles.calendarDayTextCurrent,
+                ]}>
+                  {dayNumber}
+                </Text>
+                {isWorkoutDay && (
+                  <View style={[
+                    styles.workoutDot,
+                    isCurrentWeek && styles.workoutDotCurrent,
+                  ]} />
+                )}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+    );
   };
 
   const renderWeekCard = (weekNumber: number) => {
@@ -202,117 +281,11 @@ const PlanScreen: React.FC = () => {
 
         <Card>
           <Text style={styles.cardTitle}>Monthly Schedule</Text>
+          <Text style={styles.cardSubtitle}>Tap days to view week details below</Text>
           <View style={styles.monthlySection}>
-            <View style={styles.monthBlock}>
-              <View style={styles.monthHeader}>
-                <Ionicons name="calendar-outline" size={20} color={colors.primary} />
-                <Text style={styles.monthTitle}>Month 1</Text>
-              </View>
-              <View style={styles.monthWeeks}>
-                {[1, 2, 3, 4].map(week => {
-                  const { phase, isDeload } = getPhaseInfo(week);
-                  return (
-                    <TouchableOpacity
-                      key={week}
-                      style={[
-                        styles.monthWeekItem,
-                        week === currentWeek && styles.monthWeekItemCurrent,
-                        isDeload && styles.monthWeekItemDeload,
-                      ]}
-                      onPress={() => setExpandedWeek(expandedWeek === week ? null : week)}
-                    >
-                      <Text style={[
-                        styles.monthWeekText,
-                        week === currentWeek && styles.monthWeekTextCurrent,
-                      ]}>
-                        Week {week}
-                      </Text>
-                      {week === currentWeek && (
-                        <Ionicons name="radio-button-on" size={12} color={colors.white} />
-                      )}
-                      {isDeload && (
-                        <Ionicons name="alert-circle" size={12} color={colors.warning} />
-                      )}
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-              <Text style={styles.monthPhase}>Foundation Phase</Text>
-            </View>
-
-            <View style={styles.monthBlock}>
-              <View style={styles.monthHeader}>
-                <Ionicons name="calendar-outline" size={20} color={colors.primary} />
-                <Text style={styles.monthTitle}>Month 2</Text>
-              </View>
-              <View style={styles.monthWeeks}>
-                {[5, 6, 7, 8].map(week => {
-                  const { phase, isDeload } = getPhaseInfo(week);
-                  return (
-                    <TouchableOpacity
-                      key={week}
-                      style={[
-                        styles.monthWeekItem,
-                        week === currentWeek && styles.monthWeekItemCurrent,
-                        isDeload && styles.monthWeekItemDeload,
-                      ]}
-                      onPress={() => setExpandedWeek(expandedWeek === week ? null : week)}
-                    >
-                      <Text style={[
-                        styles.monthWeekText,
-                        week === currentWeek && styles.monthWeekTextCurrent,
-                      ]}>
-                        Week {week}
-                      </Text>
-                      {week === currentWeek && (
-                        <Ionicons name="radio-button-on" size={12} color={colors.white} />
-                      )}
-                      {isDeload && (
-                        <Ionicons name="alert-circle" size={12} color={colors.warning} />
-                      )}
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-              <Text style={styles.monthPhase}>Power Development Phase</Text>
-            </View>
-
-            <View style={styles.monthBlock}>
-              <View style={styles.monthHeader}>
-                <Ionicons name="calendar-outline" size={20} color={colors.primary} />
-                <Text style={styles.monthTitle}>Month 3</Text>
-              </View>
-              <View style={styles.monthWeeks}>
-                {[9, 10, 11, 12].map(week => {
-                  const { phase, isDeload } = getPhaseInfo(week);
-                  return (
-                    <TouchableOpacity
-                      key={week}
-                      style={[
-                        styles.monthWeekItem,
-                        week === currentWeek && styles.monthWeekItemCurrent,
-                        isDeload && styles.monthWeekItemDeload,
-                      ]}
-                      onPress={() => setExpandedWeek(expandedWeek === week ? null : week)}
-                    >
-                      <Text style={[
-                        styles.monthWeekText,
-                        week === currentWeek && styles.monthWeekTextCurrent,
-                      ]}>
-                        Week {week}
-                      </Text>
-                      {week === currentWeek && (
-                        <Ionicons name="radio-button-on" size={12} color={colors.white} />
-                      )}
-                      {isDeload && (
-                        <Ionicons name="alert-circle" size={12} color={colors.warning} />
-                      )}
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-              <Text style={styles.monthPhase}>Peak Performance Phase</Text>
-            </View>
+            {renderMonthCalendar(0)}
+            {renderMonthCalendar(1)}
+            {renderMonthCalendar(2)}
           </View>
         </Card>
 
@@ -432,6 +405,11 @@ const styles = StyleSheet.create({
     fontSize: fontSize.lg,
     fontWeight: fontWeight.bold,
     color: colors.text,
+    marginBottom: spacing.xs,
+  },
+  cardSubtitle: {
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
     marginBottom: spacing.md,
   },
   overviewSection: {
@@ -635,17 +613,18 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   monthlySection: {
-    gap: spacing.lg,
+    gap: spacing.xl,
   },
   monthBlock: {
-    paddingBottom: spacing.md,
+    paddingBottom: spacing.lg,
+    marginBottom: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.backgroundLight,
   },
   monthHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
     gap: spacing.sm,
   },
   monthTitle: {
@@ -653,41 +632,65 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.bold,
     color: colors.text,
   },
-  monthWeeks: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  monthWeekItem: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.xs,
-    backgroundColor: colors.backgroundLight,
-    borderRadius: borderRadius.md,
-  },
-  monthWeekItemCurrent: {
-    backgroundColor: colors.primary,
-  },
-  monthWeekItemDeload: {
-    borderWidth: 2,
-    borderColor: colors.warning,
-  },
-  monthWeekText: {
-    fontSize: fontSize.xs,
-    fontWeight: fontWeight.semibold,
-    color: colors.text,
-  },
-  monthWeekTextCurrent: {
-    color: colors.white,
-  },
-  monthPhase: {
+  monthPhaseTitle: {
     fontSize: fontSize.sm,
     color: colors.textSecondary,
     fontStyle: 'italic',
+    marginBottom: spacing.md,
+  },
+  calendarHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: spacing.sm,
+  },
+  calendarDayHeader: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.bold,
+    color: colors.textMuted,
+  },
+  calendarGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  calendarDay: {
+    width: '14.28%', // 7 days per week
+    aspectRatio: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.xs,
+  },
+  calendarDayActive: {
+    backgroundColor: colors.backgroundLight,
+    borderRadius: borderRadius.sm,
+    margin: 1,
+  },
+  calendarDayCurrentWeek: {
+    backgroundColor: colors.primary,
+  },
+  calendarDayDeload: {
+    borderWidth: 2,
+    borderColor: colors.warning,
+  },
+  calendarDayText: {
+    fontSize: fontSize.xs,
+    color: colors.text,
+    fontWeight: fontWeight.medium,
+  },
+  calendarDayTextCurrent: {
+    color: colors.white,
+    fontWeight: fontWeight.bold,
+  },
+  workoutDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.primary,
+    marginTop: 2,
+  },
+  workoutDotCurrent: {
+    backgroundColor: colors.white,
   },
 });
 
