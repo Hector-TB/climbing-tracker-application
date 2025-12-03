@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,10 +16,10 @@ import Card from '../components/Card';
 import Button from '../components/Button';
 import { addDailyMetrics, getDailyMetrics, addClimbingMetrics } from '../services/storage';
 import { DailyMetrics, ClimbingMetrics } from '../types';
-import { format } from 'date-fns';
+import { format, subDays, addDays, isToday, isSameDay } from 'date-fns';
 
 const LogsScreen: React.FC = () => {
-  const today = format(new Date(), 'yyyy-MM-dd');
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   // Daily Metrics State
   const [gripStrength, setGripStrength] = useState('');
@@ -42,12 +42,17 @@ const LogsScreen: React.FC = () => {
 
   useFocusEffect(
     useCallback(() => {
-      loadTodayMetrics();
-    }, [])
+      loadMetricsForDate();
+    }, [selectedDate])
   );
 
-  const loadTodayMetrics = async () => {
-    const metrics = await getDailyMetrics(today);
+  useEffect(() => {
+    loadMetricsForDate();
+  }, [selectedDate]);
+
+  const loadMetricsForDate = async () => {
+    const dateString = format(selectedDate, 'yyyy-MM-dd');
+    const metrics = await getDailyMetrics(dateString);
     if (metrics) {
       setGripStrength(metrics.gripStrength?.toString() || '');
       setElbowPainWarmup(metrics.elbowPainWarmup || 0);
@@ -59,12 +64,45 @@ const LogsScreen: React.FC = () => {
       setSleepQuality(metrics.sleepQuality || 3);
       setMotivation(metrics.motivation || 3);
       setNotes(metrics.notes || '');
+    } else {
+      // Reset to defaults
+      setGripStrength('');
+      setElbowPainWarmup(0);
+      setElbowPainClimbing(0);
+      setElbowPainLockoffs(0);
+      setElbowPainPost(0);
+      setMuscleSoreness(3);
+      setEnergyLevel(3);
+      setSleepQuality(3);
+      setMotivation(3);
+      setNotes('');
+      setProblemsAttempted('');
+      setHardestGrade('');
+      setProjectsSent('');
+      setFlashAttempts('');
+      setTechniqueNotes('');
     }
   };
 
+  const goToPreviousDay = () => {
+    setSelectedDate(prev => subDays(prev, 1));
+  };
+
+  const goToNextDay = () => {
+    const nextDate = addDays(selectedDate, 1);
+    if (nextDate <= new Date()) {
+      setSelectedDate(nextDate);
+    }
+  };
+
+  const goToToday = () => {
+    setSelectedDate(new Date());
+  };
+
   const handleSaveDailyMetrics = async () => {
+    const dateString = format(selectedDate, 'yyyy-MM-dd');
     const metrics: DailyMetrics = {
-      date: today,
+      date: dateString,
       gripStrength: gripStrength ? parseFloat(gripStrength) : undefined,
       elbowPainWarmup,
       elbowPainClimbing,
@@ -82,8 +120,9 @@ const LogsScreen: React.FC = () => {
   };
 
   const handleSaveClimbingMetrics = async () => {
+    const dateString = format(selectedDate, 'yyyy-MM-dd');
     const metrics: ClimbingMetrics = {
-      date: today,
+      date: dateString,
       problemsAttempted: problemsAttempted ? parseInt(problemsAttempted) : undefined,
       hardestGrade,
       projectsSent: projectsSent ? projectsSent.split(',').map(p => p.trim()) : [],
@@ -192,8 +231,50 @@ const LogsScreen: React.FC = () => {
     >
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Daily Logs</Text>
-        <Text style={styles.headerDate}>{format(new Date(), 'MMMM d, yyyy')}</Text>
       </View>
+
+      <Card>
+        <View style={styles.datePicker}>
+          <TouchableOpacity
+            style={styles.dateButton}
+            onPress={goToPreviousDay}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={24} color={colors.primary} />
+          </TouchableOpacity>
+
+          <View style={styles.dateDisplay}>
+            <Text style={styles.dateText}>
+              {format(selectedDate, 'EEEE, MMMM d, yyyy')}
+            </Text>
+            {!isToday(selectedDate) && (
+              <TouchableOpacity
+                style={styles.todayButton}
+                onPress={goToToday}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.todayButtonText}>Go to Today</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.dateButton,
+              isToday(selectedDate) && styles.dateButtonDisabled,
+            ]}
+            onPress={goToNextDay}
+            disabled={isToday(selectedDate)}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name="chevron-forward"
+              size={24}
+              color={isToday(selectedDate) ? colors.textMuted : colors.primary}
+            />
+          </TouchableOpacity>
+        </View>
+      </Card>
 
       <Card>
         <View style={styles.summaryContainer}>
@@ -374,10 +455,38 @@ const styles = StyleSheet.create({
     fontWeight: fontWeight.bold,
     color: colors.text,
   },
-  headerDate: {
+  datePicker: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dateButton: {
+    padding: spacing.sm,
+  },
+  dateButtonDisabled: {
+    opacity: 0.3,
+  },
+  dateDisplay: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  dateText: {
     fontSize: fontSize.md,
-    color: colors.textSecondary,
+    fontWeight: fontWeight.semibold,
+    color: colors.text,
+    textAlign: 'center',
+  },
+  todayButton: {
     marginTop: spacing.xs,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.sm,
+  },
+  todayButtonText: {
+    fontSize: fontSize.xs,
+    color: colors.white,
+    fontWeight: fontWeight.semibold,
   },
   summaryContainer: {
     flexDirection: 'row',
