@@ -38,9 +38,10 @@ const ProgressScreen: React.FC = () => {
   const climbingGrades = ['V0', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7', 'V8', 'V9', 'V10', 'V11', 'V12'];
 
   const renderGradePicker = (label: string, value: string, setValue: (grade: string) => void) => (
-    <View style={styles.gradePickerContainer}>
+    <View style={styles.gradePickerColumn}>
       <Text style={styles.gradePickerLabel}>{label}</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.gradePicker}>
+      <Text style={styles.gradePickerValue}>{value}</Text>
+      <ScrollView showsVerticalScrollIndicator={false} style={styles.gradePickerScroll}>
         {climbingGrades.map((grade) => (
           <TouchableOpacity
             key={grade}
@@ -220,40 +221,34 @@ const ProgressScreen: React.FC = () => {
 
       <Card>
         <Text style={styles.cardTitle}>Weekly Summary</Text>
-        <View style={styles.statsList}>
-          <View style={styles.statRow}>
-            <View style={styles.statRowLeft}>
-              <Ionicons name="checkmark-circle" size={20} color={colors.success} />
-              <Text style={styles.statRowLabel}>Workouts Completed</Text>
-            </View>
-            <Text style={styles.statRowValue}>
+        <View style={styles.statsGrid}>
+          <View style={styles.statColumn}>
+            <Ionicons name="checkmark-circle" size={28} color={colors.success} />
+            <Text style={styles.statValue}>
               {weeklyStats.workoutsCompleted}/{weeklyStats.totalWorkouts}
             </Text>
+            <Text style={styles.statLabel}>Workouts</Text>
           </View>
-          <View style={styles.statRow}>
-            <View style={styles.statRowLeft}>
-              <Ionicons
-                name="pulse"
-                size={20}
-                color={weeklyStats.avgElbowPain >= 6 ? colors.error : colors.warning}
-              />
-              <Text style={styles.statRowLabel}>Average Elbow Pain</Text>
-            </View>
+          <View style={styles.statColumn}>
+            <Ionicons
+              name="pulse"
+              size={28}
+              color={weeklyStats.avgElbowPain >= 6 ? colors.error : colors.warning}
+            />
             <Text
               style={[
-                styles.statRowValue,
+                styles.statValue,
                 weeklyStats.avgElbowPain >= 6 && styles.statValueDanger,
               ]}
             >
               {weeklyStats.avgElbowPain}/10
             </Text>
+            <Text style={styles.statLabel}>Elbow Pain</Text>
           </View>
-          <View style={styles.statRow}>
-            <View style={styles.statRowLeft}>
-              <Ionicons name="fitness" size={20} color={colors.primary} />
-              <Text style={styles.statRowLabel}>Average Recovery</Text>
-            </View>
-            <Text style={styles.statRowValue}>{weeklyStats.avgRecovery}/20</Text>
+          <View style={styles.statColumn}>
+            <Ionicons name="fitness" size={28} color={colors.primary} />
+            <Text style={styles.statValue}>{weeklyStats.avgRecovery}/20</Text>
+            <Text style={styles.statLabel}>Recovery</Text>
           </View>
         </View>
       </Card>
@@ -263,10 +258,11 @@ const ProgressScreen: React.FC = () => {
           <Ionicons name="trophy" size={24} color={colors.accent} />
           <Text style={styles.cardTitle}>Climbing Progress</Text>
         </View>
-        <Text style={styles.cardSubtitle}>Track your highest achievements</Text>
-        {renderGradePicker('Highest Flash Grade', highestFlash, setHighestFlash)}
-        {renderGradePicker('Highest Grade Achieved', highestAchieved, setHighestAchieved)}
-        {renderGradePicker('Highest Grade Attempted', highestAttempted, setHighestAttempted)}
+        <View style={styles.gradePickersRow}>
+          {renderGradePicker('Flash', highestFlash, setHighestFlash)}
+          {renderGradePicker('Achieved', highestAchieved, setHighestAchieved)}
+          {renderGradePicker('Attempted', highestAttempted, setHighestAttempted)}
+        </View>
       </Card>
 
       <Card>
@@ -399,35 +395,32 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginBottom: spacing.md,
   },
-  statsList: {
-    gap: spacing.sm,
-  },
-  statRow: {
+  statsGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  statColumn: {
+    flex: 1,
     alignItems: 'center',
-    padding: spacing.sm,
+    padding: spacing.md,
     backgroundColor: colors.backgroundLight,
     borderRadius: borderRadius.md,
   },
-  statRowLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    flex: 1,
-  },
-  statRowLabel: {
-    fontSize: fontSize.md,
-    color: colors.text,
-    fontWeight: fontWeight.medium,
-  },
-  statRowValue: {
+  statValue: {
     fontSize: fontSize.xl,
     fontWeight: fontWeight.bold,
     color: colors.text,
+    marginTop: spacing.sm,
   },
   statValueDanger: {
     color: colors.error,
+  },
+  statLabel: {
+    fontSize: fontSize.xs,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
+    textAlign: 'center',
   },
   metricSelector: {
     flexDirection: 'row',
@@ -538,33 +531,48 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
     marginTop: -spacing.sm,
   },
-  gradePickerContainer: {
-    marginBottom: spacing.md,
-  },
-  gradePickerLabel: {
-    fontSize: fontSize.sm,
-    fontWeight: fontWeight.semibold,
-    color: colors.text,
-    marginBottom: spacing.xs,
-  },
-  gradePicker: {
+  gradePickersRow: {
     flexDirection: 'row',
+    gap: spacing.sm,
+    justifyContent: 'space-between',
   },
-  gradeButton: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    marginRight: spacing.sm,
+  gradePickerColumn: {
+    flex: 1,
+    alignItems: 'center',
     backgroundColor: colors.backgroundLight,
     borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.backgroundLight,
+    padding: spacing.sm,
+  },
+  gradePickerLabel: {
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.semibold,
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+    textAlign: 'center',
+  },
+  gradePickerValue: {
+    fontSize: fontSize.xxl,
+    fontWeight: fontWeight.bold,
+    color: colors.primary,
+    marginBottom: spacing.sm,
+  },
+  gradePickerScroll: {
+    maxHeight: 120,
+  },
+  gradeButton: {
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    marginBottom: spacing.xs,
+    backgroundColor: colors.background,
+    borderRadius: borderRadius.sm,
+    alignItems: 'center',
+    minWidth: 40,
   },
   gradeButtonActive: {
     backgroundColor: colors.primary,
-    borderColor: colors.primary,
   },
   gradeButtonText: {
-    fontSize: fontSize.md,
+    fontSize: fontSize.sm,
     color: colors.text,
     fontWeight: fontWeight.medium,
   },

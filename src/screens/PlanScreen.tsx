@@ -96,6 +96,7 @@ const PlanScreen: React.FC = () => {
                   isCurrentWeek && styles.calendarDayCurrentWeek,
                   isDeloadWeek && styles.calendarDayDeload,
                 ]}
+                activeOpacity={0.7}
                 onPress={() => {
                   console.log('Day clicked:', dayNumber, 'Week:', weekNumber);
                   setExpandedWeek(expandedWeek === weekNumber ? null : weekNumber);
@@ -617,11 +618,11 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   monthlySection: {
-    gap: spacing.sm,
+    gap: 0,
   },
   monthBlock: {
-    paddingBottom: spacing.sm,
-    marginBottom: 0,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.backgroundLight,
   },
@@ -659,15 +660,16 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   calendarDay: {
-    width: '13.5%', // 7 days per week with small gaps
+    width: '14.2%', // 7 days per week (7 × 14.2% = 99.4%)
     aspectRatio: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    margin: '0.5%',
+    minHeight: 40,
   },
   calendarDayActive: {
     backgroundColor: colors.backgroundLight,
     borderRadius: borderRadius.sm,
+    margin: 1,
   },
   calendarDayCurrentWeek: {
     backgroundColor: colors.primary,
