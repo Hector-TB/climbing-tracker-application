@@ -14,8 +14,8 @@ import { colors } from '../theme/colors';
 import { spacing, fontSize, fontWeight, borderRadius } from '../theme/spacing';
 import Card from '../components/Card';
 import Button from '../components/Button';
-import { addDailyMetrics, getDailyMetrics, addClimbingMetrics } from '../services/storage';
-import { DailyMetrics, ClimbingMetrics } from '../types';
+import { addDailyMetrics, getDailyMetrics } from '../services/storage';
+import { DailyMetrics } from '../types';
 import { format, subDays, addDays, isToday, isSameDay } from 'date-fns';
 
 const LogsScreen: React.FC = () => {
@@ -31,13 +31,6 @@ const LogsScreen: React.FC = () => {
   const [sleepQuality, setSleepQuality] = useState(3);
   const [motivation, setMotivation] = useState(3);
   const [notes, setNotes] = useState('');
-
-  // Climbing Metrics State
-  const [problemsAttempted, setProblemsAttempted] = useState('');
-  const [hardestGrade, setHardestGrade] = useState('');
-  const [projectsSent, setProjectsSent] = useState('');
-  const [flashAttempts, setFlashAttempts] = useState('');
-  const [techniqueNotes, setTechniqueNotes] = useState('');
 
   useFocusEffect(
     useCallback(() => {
@@ -73,11 +66,6 @@ const LogsScreen: React.FC = () => {
       setSleepQuality(3);
       setMotivation(3);
       setNotes('');
-      setProblemsAttempted('');
-      setHardestGrade('');
-      setProjectsSent('');
-      setFlashAttempts('');
-      setTechniqueNotes('');
     }
   };
 
@@ -113,21 +101,6 @@ const LogsScreen: React.FC = () => {
 
     await addDailyMetrics(metrics);
     Alert.alert('Saved!', 'Daily metrics have been saved successfully.');
-  };
-
-  const handleSaveClimbingMetrics = async () => {
-    const dateString = format(selectedDate, 'yyyy-MM-dd');
-    const metrics: ClimbingMetrics = {
-      date: dateString,
-      problemsAttempted: problemsAttempted ? parseInt(problemsAttempted) : undefined,
-      hardestGrade,
-      projectsSent: projectsSent ? projectsSent.split(',').map(p => p.trim()) : [],
-      flashAttempts,
-      techniqueNotes,
-    };
-
-    await addClimbingMetrics(metrics);
-    Alert.alert('Saved!', 'Climbing metrics have been saved successfully.');
   };
 
   const renderPainSlider = (
@@ -328,77 +301,6 @@ const LogsScreen: React.FC = () => {
           title="Save Daily Metrics"
           onPress={handleSaveDailyMetrics}
           variant="primary"
-        />
-      </Card>
-
-      <Card>
-        <View style={styles.sectionHeader}>
-          <Ionicons name="trending-up" size={24} color={colors.secondary} />
-          <Text style={styles.sectionTitle}>Climbing Metrics</Text>
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Problems Attempted</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Total number of problems"
-            placeholderTextColor={colors.textMuted}
-            value={problemsAttempted}
-            onChangeText={setProblemsAttempted}
-            keyboardType="numeric"
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Hardest Grade Attempted</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder="e.g., V5"
-            placeholderTextColor={colors.textMuted}
-            value={hardestGrade}
-            onChangeText={setHardestGrade}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Projects Sent (comma separated)</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder="e.g., V5 Overhang, V4 Technical"
-            placeholderTextColor={colors.textMuted}
-            value={projectsSent}
-            onChangeText={setProjectsSent}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Flash Attempts</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder="e.g., 3/5 V4s flashed"
-            placeholderTextColor={colors.textMuted}
-            value={flashAttempts}
-            onChangeText={setFlashAttempts}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Technique Notes</Text>
-          <TextInput
-            style={[styles.textInput, styles.textArea]}
-            placeholder="What worked well? What to improve?"
-            placeholderTextColor={colors.textMuted}
-            value={techniqueNotes}
-            onChangeText={setTechniqueNotes}
-            multiline
-            numberOfLines={4}
-          />
-        </View>
-
-        <Button
-          title="Save Climbing Metrics"
-          onPress={handleSaveClimbingMetrics}
-          variant="secondary"
         />
       </Card>
 
