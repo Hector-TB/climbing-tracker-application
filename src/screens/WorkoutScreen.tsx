@@ -60,6 +60,8 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ route, navigation }) => {
       // Initialize exercises from workout plan
       const allExercises = workoutData.sections.flatMap(section => section.exercises);
       setExercises(allExercises.map(ex => ({ ...ex, completed: false })));
+      setWorkoutCompleted(false);
+      setUseLowEnergy(false);
     }
   };
 

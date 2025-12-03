@@ -23,12 +23,14 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [stats, setStats] = useState({ totalWorkouts: 0, completedWorkouts: 0, completionRate: 0 });
   const [refreshing, setRefreshing] = useState(false);
   const [todayWorkout, setTodayWorkout] = useState<any>(null);
+  const [workoutLogs, setWorkoutLogs] = useState<any[]>([]);
 
   const loadData = async () => {
     const progress = await getUserProgress();
     const workoutStats = await getWorkoutStats();
     setCurrentWeek(progress.currentWeek);
     setStats(workoutStats);
+    setWorkoutLogs(progress.workoutLogs);
 
     // Get today's workout
     const today = new Date();
@@ -71,6 +73,11 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           const isToday = day === today;
           const workout = getWorkoutForWeek(currentWeek, day);
           const dayDate = addDays(startDate, index);
+          const dateString = format(dayDate, 'yyyy-MM-dd');
+
+          // Check if this day's workout is completed
+          const workoutLog = workoutLogs.find(log => log.date === dateString && log.day === day);
+          const isCompleted = workoutLog?.completed || false;
 
           return (
             <TouchableOpacity
@@ -89,9 +96,17 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 {day.substring(0, 3)}
               </Text>
               <View style={[styles.scheduleDayCircle, isToday && styles.scheduleDayCircleToday]}>
-                <Text style={[styles.scheduleDayDate, isToday && styles.scheduleDayDateToday]}>
-                  {format(dayDate, 'd')}
-                </Text>
+                {isCompleted ? (
+                  <Ionicons
+                    name="checkmark"
+                    size={18}
+                    color={isToday ? colors.white : colors.primary}
+                  />
+                ) : (
+                  <Text style={[styles.scheduleDayDate, isToday && styles.scheduleDayDateToday]}>
+                    {format(dayDate, 'd')}
+                  </Text>
+                )}
               </View>
               <Text style={styles.scheduleWorkoutTitle} numberOfLines={1}>
                 {workout.title.split(' ')[0]}
