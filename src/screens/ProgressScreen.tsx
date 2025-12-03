@@ -223,7 +223,7 @@ const ProgressScreen: React.FC = () => {
         <View style={styles.statsList}>
           <View style={styles.statRow}>
             <View style={styles.statRowLeft}>
-              <Ionicons name="checkmark-circle" size={24} color={colors.success} />
+              <Ionicons name="checkmark-circle" size={20} color={colors.success} />
               <Text style={styles.statRowLabel}>Workouts Completed</Text>
             </View>
             <Text style={styles.statRowValue}>
@@ -234,7 +234,7 @@ const ProgressScreen: React.FC = () => {
             <View style={styles.statRowLeft}>
               <Ionicons
                 name="pulse"
-                size={24}
+                size={20}
                 color={weeklyStats.avgElbowPain >= 6 ? colors.error : colors.warning}
               />
               <Text style={styles.statRowLabel}>Average Elbow Pain</Text>
@@ -250,7 +250,7 @@ const ProgressScreen: React.FC = () => {
           </View>
           <View style={styles.statRow}>
             <View style={styles.statRowLeft}>
-              <Ionicons name="fitness" size={24} color={colors.primary} />
+              <Ionicons name="fitness" size={20} color={colors.primary} />
               <Text style={styles.statRowLabel}>Average Recovery</Text>
             </View>
             <Text style={styles.statRowValue}>{weeklyStats.avgRecovery}/20</Text>
@@ -400,13 +400,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   statsList: {
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   statRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: spacing.md,
+    padding: spacing.sm,
     backgroundColor: colors.backgroundLight,
     borderRadius: borderRadius.md,
   },
@@ -539,13 +539,13 @@ const styles = StyleSheet.create({
     marginTop: -spacing.sm,
   },
   gradePickerContainer: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   gradePickerLabel: {
-    fontSize: fontSize.md,
+    fontSize: fontSize.sm,
     fontWeight: fontWeight.semibold,
     color: colors.text,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
   },
   gradePicker: {
     flexDirection: 'row',

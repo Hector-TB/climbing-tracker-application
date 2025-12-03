@@ -617,11 +617,11 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   monthlySection: {
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   monthBlock: {
-    paddingBottom: spacing.md,
-    marginBottom: spacing.sm,
+    paddingBottom: spacing.sm,
+    marginBottom: 0,
     borderBottomWidth: 1,
     borderBottomColor: colors.backgroundLight,
   },
@@ -659,16 +659,15 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   calendarDay: {
-    width: '14.28%', // 7 days per week
+    width: '13.5%', // 7 days per week with small gaps
     aspectRatio: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: spacing.xs,
+    margin: '0.5%',
   },
   calendarDayActive: {
     backgroundColor: colors.backgroundLight,
     borderRadius: borderRadius.sm,
-    margin: 1,
   },
   calendarDayCurrentWeek: {
     backgroundColor: colors.primary,
