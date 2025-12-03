@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
@@ -35,6 +36,8 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ route, navigation }) => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [useLowEnergy, setUseLowEnergy] = useState(false);
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [showSavedIndicator, setShowSavedIndicator] = useState(false);
 
   const { phase, isDeload } = getPhaseInfo(weekNumber);
 
@@ -48,6 +51,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ route, navigation }) => {
 
     // Load saved workout log if exists
     const savedLog = await getWorkoutLog(date, day);
+    console.log('Loading workout log:', savedLog);
     if (savedLog) {
       setExercises(savedLog.exercises);
       setUseLowEnergy(savedLog.usedLowEnergy);
@@ -59,15 +63,42 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ route, navigation }) => {
     }
   };
 
-  const handleToggleExercise = (exerciseId: string) => {
-    setExercises(prev =>
-      prev.map(ex =>
-        ex.id === exerciseId ? { ...ex, completed: !ex.completed } : ex
-      )
+  const autoSave = async (updatedExercises: Exercise[]) => {
+    const completedCount = updatedExercises.filter(ex => ex.completed).length;
+    const totalCount = updatedExercises.length;
+    const isComplete = completedCount === totalCount;
+
+    const workoutLog: WorkoutLog = {
+      id: `${date}-${day}`,
+      date,
+      day: day as any,
+      weekNumber,
+      completed: isComplete,
+      exercises: updatedExercises,
+      usedLowEnergy,
+    };
+
+    console.log('Auto-saving workout:', workoutLog);
+    await addWorkoutLog(workoutLog);
+    setWorkoutCompleted(isComplete);
+
+    // Show saved indicator briefly
+    setShowSavedIndicator(true);
+    setTimeout(() => setShowSavedIndicator(false), 2000);
+  };
+
+  const handleToggleExercise = async (exerciseId: string) => {
+    const updatedExercises = exercises.map(ex =>
+      ex.id === exerciseId ? { ...ex, completed: !ex.completed } : ex
     );
+    setExercises(updatedExercises);
+
+    // Auto-save when toggling
+    await autoSave(updatedExercises);
   };
 
   const handleSaveWorkout = async () => {
+    setSaving(true);
     const completedCount = exercises.filter(ex => ex.completed).length;
     const totalCount = exercises.length;
     const isComplete = completedCount === totalCount;
@@ -82,11 +113,17 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ route, navigation }) => {
       usedLowEnergy,
     };
 
+    console.log('Saving workout:', workoutLog);
     await addWorkoutLog(workoutLog);
     setWorkoutCompleted(isComplete);
+    setSaving(false);
+
+    // Show saved indicator
+    setShowSavedIndicator(true);
+    setTimeout(() => setShowSavedIndicator(false), 3000);
 
     Alert.alert(
-      'Workout Saved!',
+      'Saved! ✓',
       `Progress: ${completedCount}/${totalCount} exercises completed`,
       [{ text: 'OK' }]
     );
@@ -111,6 +148,7 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ route, navigation }) => {
   };
 
   const completeWorkout = async () => {
+    setSaving(true);
     const workoutLog: WorkoutLog = {
       id: `${date}-${day}`,
       date,
@@ -121,9 +159,15 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ route, navigation }) => {
       usedLowEnergy,
     };
 
+    console.log('Completing workout:', workoutLog);
     await addWorkoutLog(workoutLog);
     setWorkoutCompleted(true);
     setExercises(prev => prev.map(ex => ({ ...ex, completed: true })));
+    setSaving(false);
+
+    // Show saved indicator
+    setShowSavedIndicator(true);
+    setTimeout(() => setShowSavedIndicator(false), 3000);
 
     Alert.alert(
       'Workout Complete! 🎉',
@@ -196,7 +240,15 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ route, navigation }) => {
           <View style={styles.progressContainer}>
             <View style={styles.progressHeader}>
               <Text style={styles.progressTitle}>Progress</Text>
-              <Text style={styles.progressPercentage}>{completionPercentage}%</Text>
+              <View style={styles.progressRightSection}>
+                {showSavedIndicator && (
+                  <View style={styles.savedIndicator}>
+                    <Ionicons name="checkmark-circle" size={16} color={colors.success} />
+                    <Text style={styles.savedText}>Saved</Text>
+                  </View>
+                )}
+                <Text style={styles.progressPercentage}>{completionPercentage}%</Text>
+              </View>
             </View>
             <View style={styles.progressBarContainer}>
               <View
@@ -259,12 +311,15 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ route, navigation }) => {
           onPress={handleSaveWorkout}
           variant="outline"
           style={styles.saveButton}
+          loading={saving}
+          disabled={saving}
         />
         <Button
           title={workoutCompleted ? 'Completed ✓' : 'Complete Workout'}
           onPress={handleCompleteWorkout}
           variant="primary"
-          disabled={workoutCompleted}
+          disabled={workoutCompleted || saving}
+          loading={saving}
           style={styles.completeButton}
         />
       </View>
@@ -345,6 +400,25 @@ const styles = StyleSheet.create({
     fontSize: fontSize.md,
     fontWeight: fontWeight.semibold,
     color: colors.text,
+  },
+  progressRightSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  savedIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(6, 255, 165, 0.2)',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: borderRadius.sm,
+  },
+  savedText: {
+    fontSize: fontSize.xs,
+    color: colors.success,
+    marginLeft: 4,
+    fontWeight: fontWeight.semibold,
   },
   progressPercentage: {
     fontSize: fontSize.lg,
