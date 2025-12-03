@@ -30,6 +30,38 @@ const ProgressScreen: React.FC = () => {
     avgRecovery: 0,
   });
 
+  // Climbing Progress State
+  const [highestFlash, setHighestFlash] = useState('V0');
+  const [highestAchieved, setHighestAchieved] = useState('V0');
+  const [highestAttempted, setHighestAttempted] = useState('V0');
+
+  const climbingGrades = ['V0', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7', 'V8', 'V9', 'V10', 'V11', 'V12'];
+
+  const renderGradePicker = (label: string, value: string, setValue: (grade: string) => void) => (
+    <View style={styles.gradePickerContainer}>
+      <Text style={styles.gradePickerLabel}>{label}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.gradePicker}>
+        {climbingGrades.map((grade) => (
+          <TouchableOpacity
+            key={grade}
+            style={[
+              styles.gradeButton,
+              value === grade && styles.gradeButtonActive,
+            ]}
+            onPress={() => setValue(grade)}
+          >
+            <Text style={[
+              styles.gradeButtonText,
+              value === grade && styles.gradeButtonTextActive,
+            ]}>
+              {grade}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+
   useFocusEffect(
     useCallback(() => {
       loadProgressData();
@@ -224,6 +256,17 @@ const ProgressScreen: React.FC = () => {
             <Text style={styles.statRowValue}>{weeklyStats.avgRecovery}/20</Text>
           </View>
         </View>
+      </Card>
+
+      <Card>
+        <View style={styles.sectionHeaderRow}>
+          <Ionicons name="trophy" size={24} color={colors.accent} />
+          <Text style={styles.cardTitle}>Climbing Progress</Text>
+        </View>
+        <Text style={styles.cardSubtitle}>Track your highest achievements</Text>
+        {renderGradePicker('Highest Flash Grade', highestFlash, setHighestFlash)}
+        {renderGradePicker('Highest Grade Achieved', highestAchieved, setHighestAchieved)}
+        {renderGradePicker('Highest Grade Attempted', highestAttempted, setHighestAttempted)}
       </Card>
 
       <Card>
@@ -482,6 +525,52 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     flex: 1,
     lineHeight: 20,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  cardSubtitle: {
+    fontSize: fontSize.sm,
+    color: colors.textMuted,
+    marginBottom: spacing.lg,
+    marginTop: -spacing.sm,
+  },
+  gradePickerContainer: {
+    marginBottom: spacing.lg,
+  },
+  gradePickerLabel: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.semibold,
+    color: colors.text,
+    marginBottom: spacing.sm,
+  },
+  gradePicker: {
+    flexDirection: 'row',
+  },
+  gradeButton: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginRight: spacing.sm,
+    backgroundColor: colors.backgroundLight,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.backgroundLight,
+  },
+  gradeButtonActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  gradeButtonText: {
+    fontSize: fontSize.md,
+    color: colors.text,
+    fontWeight: fontWeight.medium,
+  },
+  gradeButtonTextActive: {
+    color: colors.white,
+    fontWeight: fontWeight.bold,
   },
 });
 

@@ -81,7 +81,8 @@ const PlanScreen: React.FC = () => {
           {daysInMonth.map((day, index) => {
             const dayOfWeek = format(day, 'EEEE');
             const dayNumber = format(day, 'd');
-            const weekNumber = weekNumbers[Math.floor((emptyCells + index) / 7)];
+            const dayIndex = Math.floor((emptyCells + index) / 7);
+            const weekNumber = weekNumbers[dayIndex] || weekNumbers[weekNumbers.length - 1];
             const isWorkoutDay = weeklySchedule.includes(dayOfWeek as any);
             const isCurrentWeek = weekNumber === currentWeek;
             const isDeloadWeek = weekNumber === 6;
@@ -95,7 +96,10 @@ const PlanScreen: React.FC = () => {
                   isCurrentWeek && styles.calendarDayCurrentWeek,
                   isDeloadWeek && styles.calendarDayDeload,
                 ]}
-                onPress={() => isWorkoutDay && setExpandedWeek(weekNumber)}
+                onPress={() => {
+                  console.log('Day clicked:', dayNumber, 'Week:', weekNumber);
+                  setExpandedWeek(expandedWeek === weekNumber ? null : weekNumber);
+                }}
               >
                 <Text style={[
                   styles.calendarDayText,
@@ -613,11 +617,11 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   monthlySection: {
-    gap: spacing.xl,
+    gap: spacing.md,
   },
   monthBlock: {
-    paddingBottom: spacing.lg,
-    marginBottom: spacing.md,
+    paddingBottom: spacing.md,
+    marginBottom: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.backgroundLight,
   },
