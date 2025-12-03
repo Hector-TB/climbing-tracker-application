@@ -82,7 +82,10 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               onPress={() => navigateToWorkout(day, index - weeklySchedule.indexOf(today))}
               activeOpacity={0.7}
             >
-              <Text style={[styles.scheduleDayName, isToday && styles.scheduleDayNameToday]}>
+              <Text
+                style={[styles.scheduleDayName, isToday && styles.scheduleDayNameToday]}
+                numberOfLines={1}
+              >
                 {day.substring(0, 3)}
               </Text>
               <View style={[styles.scheduleDayCircle, isToday && styles.scheduleDayCircleToday]}>
@@ -90,7 +93,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                   {format(dayDate, 'd')}
                 </Text>
               </View>
-              <Text style={styles.scheduleWorkoutTitle} numberOfLines={2}>
+              <Text style={styles.scheduleWorkoutTitle} numberOfLines={1}>
                 {workout.title.split(' ')[0]}
               </Text>
             </TouchableOpacity>
@@ -294,10 +297,10 @@ const styles = StyleSheet.create({
   },
   scheduleDay: {
     alignItems: 'center',
-    padding: spacing.sm,
+    padding: spacing.xs,
     borderRadius: borderRadius.md,
     flex: 1,
-    marginHorizontal: 2,
+    marginHorizontal: 1,
   },
   scheduleDayToday: {
     backgroundColor: colors.backgroundLight,

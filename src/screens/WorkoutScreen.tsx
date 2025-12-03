@@ -98,35 +98,41 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ route, navigation }) => {
   };
 
   const handleSaveWorkout = async () => {
-    setSaving(true);
-    const completedCount = exercises.filter(ex => ex.completed).length;
-    const totalCount = exercises.length;
-    const isComplete = completedCount === totalCount;
+    try {
+      setSaving(true);
+      const completedCount = exercises.filter(ex => ex.completed).length;
+      const totalCount = exercises.length;
+      const isComplete = completedCount === totalCount;
 
-    const workoutLog: WorkoutLog = {
-      id: `${date}-${day}`,
-      date,
-      day: day as any,
-      weekNumber,
-      completed: isComplete,
-      exercises,
-      usedLowEnergy,
-    };
+      const workoutLog: WorkoutLog = {
+        id: `${date}-${day}`,
+        date,
+        day: day as any,
+        weekNumber,
+        completed: isComplete,
+        exercises,
+        usedLowEnergy,
+      };
 
-    console.log('Saving workout:', workoutLog);
-    await addWorkoutLog(workoutLog);
-    setWorkoutCompleted(isComplete);
-    setSaving(false);
+      console.log('Saving workout:', workoutLog);
+      await addWorkoutLog(workoutLog);
+      setWorkoutCompleted(isComplete);
 
-    // Show saved indicator
-    setShowSavedIndicator(true);
-    setTimeout(() => setShowSavedIndicator(false), 3000);
+      // Show saved indicator
+      setShowSavedIndicator(true);
+      setTimeout(() => setShowSavedIndicator(false), 3000);
 
-    Alert.alert(
-      'Saved! ✓',
-      `Progress: ${completedCount}/${totalCount} exercises completed`,
-      [{ text: 'OK' }]
-    );
+      Alert.alert(
+        'Saved! ✓',
+        `Progress: ${completedCount}/${totalCount} exercises completed`,
+        [{ text: 'OK' }]
+      );
+    } catch (error) {
+      console.error('Error saving workout:', error);
+      Alert.alert('Error', 'Failed to save workout. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCompleteWorkout = async () => {
@@ -148,35 +154,41 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ route, navigation }) => {
   };
 
   const completeWorkout = async () => {
-    setSaving(true);
-    const workoutLog: WorkoutLog = {
-      id: `${date}-${day}`,
-      date,
-      day: day as any,
-      weekNumber,
-      completed: true,
-      exercises: exercises.map(ex => ({ ...ex, completed: true })),
-      usedLowEnergy,
-    };
+    try {
+      setSaving(true);
+      const workoutLog: WorkoutLog = {
+        id: `${date}-${day}`,
+        date,
+        day: day as any,
+        weekNumber,
+        completed: true,
+        exercises: exercises.map(ex => ({ ...ex, completed: true })),
+        usedLowEnergy,
+      };
 
-    console.log('Completing workout:', workoutLog);
-    await addWorkoutLog(workoutLog);
-    setWorkoutCompleted(true);
-    setExercises(prev => prev.map(ex => ({ ...ex, completed: true })));
-    setSaving(false);
+      console.log('Completing workout:', workoutLog);
+      await addWorkoutLog(workoutLog);
+      setWorkoutCompleted(true);
+      setExercises(prev => prev.map(ex => ({ ...ex, completed: true })));
 
-    // Show saved indicator
-    setShowSavedIndicator(true);
-    setTimeout(() => setShowSavedIndicator(false), 3000);
+      // Show saved indicator
+      setShowSavedIndicator(true);
+      setTimeout(() => setShowSavedIndicator(false), 3000);
 
-    Alert.alert(
-      'Workout Complete! 🎉',
-      'Great job! Your progress has been saved.',
-      [
-        { text: 'Go Home', onPress: () => navigation.navigate('Home') },
-        { text: 'OK' },
-      ]
-    );
+      Alert.alert(
+        'Workout Complete! 🎉',
+        'Great job! Your progress has been saved.',
+        [
+          { text: 'Go Home', onPress: () => navigation.navigate('Home') },
+          { text: 'OK' },
+        ]
+      );
+    } catch (error) {
+      console.error('Error completing workout:', error);
+      Alert.alert('Error', 'Failed to complete workout. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const completionPercentage = Math.round(
