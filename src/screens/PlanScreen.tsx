@@ -200,6 +200,122 @@ const PlanScreen: React.FC = () => {
           </View>
         </Card>
 
+        <Card>
+          <Text style={styles.cardTitle}>Monthly Schedule</Text>
+          <View style={styles.monthlySection}>
+            <View style={styles.monthBlock}>
+              <View style={styles.monthHeader}>
+                <Ionicons name="calendar-outline" size={20} color={colors.primary} />
+                <Text style={styles.monthTitle}>Month 1</Text>
+              </View>
+              <View style={styles.monthWeeks}>
+                {[1, 2, 3, 4].map(week => {
+                  const { phase, isDeload } = getPhaseInfo(week);
+                  return (
+                    <TouchableOpacity
+                      key={week}
+                      style={[
+                        styles.monthWeekItem,
+                        week === currentWeek && styles.monthWeekItemCurrent,
+                        isDeload && styles.monthWeekItemDeload,
+                      ]}
+                      onPress={() => setExpandedWeek(expandedWeek === week ? null : week)}
+                    >
+                      <Text style={[
+                        styles.monthWeekText,
+                        week === currentWeek && styles.monthWeekTextCurrent,
+                      ]}>
+                        Week {week}
+                      </Text>
+                      {week === currentWeek && (
+                        <Ionicons name="radio-button-on" size={12} color={colors.white} />
+                      )}
+                      {isDeload && (
+                        <Ionicons name="alert-circle" size={12} color={colors.warning} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+              <Text style={styles.monthPhase}>Foundation Phase</Text>
+            </View>
+
+            <View style={styles.monthBlock}>
+              <View style={styles.monthHeader}>
+                <Ionicons name="calendar-outline" size={20} color={colors.primary} />
+                <Text style={styles.monthTitle}>Month 2</Text>
+              </View>
+              <View style={styles.monthWeeks}>
+                {[5, 6, 7, 8].map(week => {
+                  const { phase, isDeload } = getPhaseInfo(week);
+                  return (
+                    <TouchableOpacity
+                      key={week}
+                      style={[
+                        styles.monthWeekItem,
+                        week === currentWeek && styles.monthWeekItemCurrent,
+                        isDeload && styles.monthWeekItemDeload,
+                      ]}
+                      onPress={() => setExpandedWeek(expandedWeek === week ? null : week)}
+                    >
+                      <Text style={[
+                        styles.monthWeekText,
+                        week === currentWeek && styles.monthWeekTextCurrent,
+                      ]}>
+                        Week {week}
+                      </Text>
+                      {week === currentWeek && (
+                        <Ionicons name="radio-button-on" size={12} color={colors.white} />
+                      )}
+                      {isDeload && (
+                        <Ionicons name="alert-circle" size={12} color={colors.warning} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+              <Text style={styles.monthPhase}>Power Development Phase</Text>
+            </View>
+
+            <View style={styles.monthBlock}>
+              <View style={styles.monthHeader}>
+                <Ionicons name="calendar-outline" size={20} color={colors.primary} />
+                <Text style={styles.monthTitle}>Month 3</Text>
+              </View>
+              <View style={styles.monthWeeks}>
+                {[9, 10, 11, 12].map(week => {
+                  const { phase, isDeload } = getPhaseInfo(week);
+                  return (
+                    <TouchableOpacity
+                      key={week}
+                      style={[
+                        styles.monthWeekItem,
+                        week === currentWeek && styles.monthWeekItemCurrent,
+                        isDeload && styles.monthWeekItemDeload,
+                      ]}
+                      onPress={() => setExpandedWeek(expandedWeek === week ? null : week)}
+                    >
+                      <Text style={[
+                        styles.monthWeekText,
+                        week === currentWeek && styles.monthWeekTextCurrent,
+                      ]}>
+                        Week {week}
+                      </Text>
+                      {week === currentWeek && (
+                        <Ionicons name="radio-button-on" size={12} color={colors.white} />
+                      )}
+                      {isDeload && (
+                        <Ionicons name="alert-circle" size={12} color={colors.warning} />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+              <Text style={styles.monthPhase}>Peak Performance Phase</Text>
+            </View>
+          </View>
+        </Card>
+
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>All Weeks</Text>
           <Text style={styles.sectionSubtitle}>Tap to expand details</Text>
@@ -517,6 +633,61 @@ const styles = StyleSheet.create({
   modalWeekPhase: {
     fontSize: fontSize.sm,
     color: colors.textSecondary,
+  },
+  monthlySection: {
+    gap: spacing.lg,
+  },
+  monthBlock: {
+    paddingBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.backgroundLight,
+  },
+  monthHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+    gap: spacing.sm,
+  },
+  monthTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
+  },
+  monthWeeks: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  monthWeekItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xs,
+    backgroundColor: colors.backgroundLight,
+    borderRadius: borderRadius.md,
+  },
+  monthWeekItemCurrent: {
+    backgroundColor: colors.primary,
+  },
+  monthWeekItemDeload: {
+    borderWidth: 2,
+    borderColor: colors.warning,
+  },
+  monthWeekText: {
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.semibold,
+    color: colors.text,
+  },
+  monthWeekTextCurrent: {
+    color: colors.white,
+  },
+  monthPhase: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    fontStyle: 'italic',
   },
 });
 
