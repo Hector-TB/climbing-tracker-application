@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
 import { spacing, fontSize, fontWeight, borderRadius } from '../theme/spacing';
 import Card from '../components/Card';
-import { getUserProgress } from '../services/storage';
+import { getUserProgress, saveClimbingProgress, getClimbingProgress } from '../services/storage';
 import { format, subDays, parseISO } from 'date-fns';
 
 const screenWidth = Dimensions.get('window').width - spacing.md * 2;
@@ -36,6 +36,35 @@ const ProgressScreen: React.FC = () => {
   const [highestAttempted, setHighestAttempted] = useState('V0');
 
   const climbingGrades = ['V0', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6', 'V7', 'V8', 'V9', 'V10', 'V11', 'V12'];
+
+  // Load climbing progress on mount
+  useFocusEffect(
+    useCallback(() => {
+      loadClimbingProgress();
+    }, [])
+  );
+
+  const loadClimbingProgress = async () => {
+    const saved = await getClimbingProgress();
+    console.log('Loaded climbing progress:', saved);
+    setHighestFlash(saved.highestFlash);
+    setHighestAchieved(saved.highestAchieved);
+    setHighestAttempted(saved.highestAttempted);
+  };
+
+  // Auto-save climbing progress when grades change
+  useFocusEffect(
+    useCallback(() => {
+      const saveProgress = async () => {
+        await saveClimbingProgress({
+          highestFlash,
+          highestAchieved,
+          highestAttempted,
+        });
+      };
+      saveProgress();
+    }, [highestFlash, highestAchieved, highestAttempted])
+  );
 
   const renderGradePicker = (label: string, value: string, setValue: (grade: string) => void) => (
     <View style={styles.gradePickerColumn}>

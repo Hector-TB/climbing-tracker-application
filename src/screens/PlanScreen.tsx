@@ -17,7 +17,7 @@ import { getUserProgress, updateCurrentWeek } from '../services/storage';
 import { getPhaseInfo, weeklySchedule } from '../data/trainingPlan';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, getDay, addMonths } from 'date-fns';
 
-const PlanScreen: React.FC = () => {
+const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [currentWeek, setCurrentWeek] = useState(1);
   const [expandedWeek, setExpandedWeek] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -100,8 +100,13 @@ const PlanScreen: React.FC = () => {
                 ]}
                 activeOpacity={0.7}
                 onPress={() => {
-                  console.log(`✅ Day ${dayNumber} (Week ${weekNumber}) clicked! Toggling week ${weekNumber}`);
-                  setExpandedWeek(expandedWeek === weekNumber ? null : weekNumber);
+                  const dateString = format(day, 'yyyy-MM-dd');
+                  console.log(`✅ Day ${dayNumber} (${dayOfWeek}) clicked! Navigating to workout for ${dateString}, Week ${weekNumber}`);
+                  navigation.navigate('Workout', {
+                    date: dateString,
+                    day: dayOfWeek,
+                    weekNumber: weekNumber,
+                  });
                 }}
               >
                 <Text style={[
