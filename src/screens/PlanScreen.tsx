@@ -55,7 +55,7 @@ const PlanScreen: React.FC = () => {
     const startDay = getDay(monthStartDate); // 0 = Sunday
     const emptyCells = startDay === 0 ? 6 : startDay - 1; // Adjust for Monday start
 
-    console.log(`Month ${monthIndex + 1}: startDay=${startDay}, emptyCells=${emptyCells}, totalDays=${daysInMonth.length}`);
+    console.log(`📅 Month ${monthIndex + 1}: startDay=${startDay}, emptyCells=${emptyCells}, totalDays=${daysInMonth.length}, total cells=${emptyCells + daysInMonth.length}`);
 
     return (
       <View style={styles.monthBlock}>
@@ -73,7 +73,7 @@ const PlanScreen: React.FC = () => {
         </View>
 
         {/* Calendar grid */}
-        <View style={styles.calendarGrid} pointerEvents="box-none">
+        <View style={styles.calendarGrid}>
           {/* Empty cells before month starts */}
           {Array.from({ length: emptyCells }).map((_, i) => (
             <View key={`empty-${i}`} style={styles.calendarDay} />
@@ -89,11 +89,6 @@ const PlanScreen: React.FC = () => {
             const isCurrentWeek = weekNumber === currentWeek;
             const isDeloadWeek = weekNumber === 6;
 
-            // Debug log for first few days
-            if (index < 3) {
-              console.log(`Day ${index}: ${dayNumber}, Week ${weekNumber}, isWorkout: ${isWorkoutDay}`);
-            }
-
             return (
               <TouchableOpacity
                 key={day.toISOString()}
@@ -104,14 +99,10 @@ const PlanScreen: React.FC = () => {
                   isDeloadWeek && styles.calendarDayDeload,
                 ]}
                 activeOpacity={0.7}
-                onPressIn={() => console.log(`👆 Day ${dayNumber} press started`)}
                 onPress={() => {
-                  console.log(`✅ Day ${dayNumber} clicked! Week: ${weekNumber}, Currently expanded: ${expandedWeek}`);
-                  const newExpanded = expandedWeek === weekNumber ? null : weekNumber;
-                  console.log(`Setting expandedWeek to: ${newExpanded}`);
-                  setExpandedWeek(newExpanded);
+                  console.log(`✅ Day ${dayNumber} (Week ${weekNumber}) clicked! Toggling week ${weekNumber}`);
+                  setExpandedWeek(expandedWeek === weekNumber ? null : weekNumber);
                 }}
-                onPressOut={() => console.log(`👆 Day ${dayNumber} press ended`)}
               >
                 <Text style={[
                   styles.calendarDayText,
@@ -629,12 +620,8 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   monthlySection: {
-    gap: 0,
   },
   monthBlock: {
-    paddingBottom: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.backgroundLight,
   },
   monthHeader: {
     flexDirection: 'row',
@@ -668,10 +655,9 @@ const styles = StyleSheet.create({
   calendarGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 4,
   },
   calendarDay: {
-    width: '13.5%', // 7 days with gaps: (13.5% × 7) + (gaps) = ~100%
+    width: '14.285714%', // Exactly 1/7 = 14.285714%
     aspectRatio: 1,
     alignItems: 'center',
     justifyContent: 'center',
