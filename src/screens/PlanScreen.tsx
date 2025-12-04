@@ -16,11 +16,13 @@ import PhaseIndicator from '../components/PhaseIndicator';
 import { getUserProgress, updateCurrentWeek } from '../services/storage';
 import { getPhaseInfo, weeklySchedule } from '../data/trainingPlan';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, getDay, addMonths } from 'date-fns';
+import { WorkoutLog } from '../types';
 
 const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [currentWeek, setCurrentWeek] = useState(1);
   const [expandedWeek, setExpandedWeek] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -31,6 +33,7 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const loadCurrentWeek = async () => {
     const progress = await getUserProgress();
     setCurrentWeek(progress.currentWeek);
+    setWorkoutLogs(progress.workoutLogs);
   };
 
   const handleChangeWeek = async (week: number) => {
@@ -81,11 +84,16 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           {daysInMonth.map((day, index) => {
             const dayOfWeek = format(day, 'EEEE');
             const dayNumber = format(day, 'd');
+            const dateString = format(day, 'yyyy-MM-dd');
             const dayIndex = Math.floor((emptyCells + index) / 7);
             const weekNumber = weekNumbers[dayIndex] || weekNumbers[weekNumbers.length - 1];
             const isWorkoutDay = weeklySchedule.includes(dayOfWeek as any);
             const isCurrentWeek = weekNumber === currentWeek;
             const isDeloadWeek = weekNumber === 6;
+
+            // Check if workout is completed
+            const workoutLog = workoutLogs.find(log => log.date === dateString && log.day === dayOfWeek);
+            const isCompleted = workoutLog?.completed || false;
 
             return (
               <TouchableOpacity
@@ -98,7 +106,6 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 ]}
                 activeOpacity={0.7}
                 onPress={() => {
-                  const dateString = format(day, 'yyyy-MM-dd');
                   navigation.navigate('Workout', {
                     date: dateString,
                     day: dayOfWeek,
@@ -112,12 +119,19 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 ]}>
                   {dayNumber}
                 </Text>
-                {isWorkoutDay && (
+                {isCompleted ? (
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={14}
+                    color={colors.success}
+                    style={styles.completedIcon}
+                  />
+                ) : isWorkoutDay ? (
                   <View style={[
                     styles.workoutDot,
                     isCurrentWeek && styles.workoutDotCurrent,
                   ]} />
-                )}
+                ) : null}
               </TouchableOpacity>
             );
           })}
@@ -694,6 +708,9 @@ const styles = StyleSheet.create({
   },
   workoutDotCurrent: {
     backgroundColor: colors.white,
+  },
+  completedIcon: {
+    marginTop: 2,
   },
 });
 
