@@ -11,7 +11,14 @@ const STORAGE_KEYS = {
   USER_PROGRESS: '@climbing_tracker:user_progress',
   CURRENT_WEEK: '@climbing_tracker:current_week',
   START_DATE: '@climbing_tracker:start_date',
+  CLIMBING_PROGRESS: '@climbing_tracker:climbing_progress',
 };
+
+export interface ClimbingProgress {
+  highestFlash: string;
+  highestAchieved: string;
+  highestAttempted: string;
+}
 
 // Initialize default user progress
 const getDefaultProgress = (): UserProgress => ({
@@ -188,5 +195,28 @@ export const getWorkoutStats = async (): Promise<{
   } catch (error) {
     console.error('Error getting workout stats:', error);
     return { totalWorkouts: 0, completedWorkouts: 0, completionRate: 0 };
+  }
+};
+
+// Save climbing progress (highest grades)
+export const saveClimbingProgress = async (progress: ClimbingProgress): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(STORAGE_KEYS.CLIMBING_PROGRESS, JSON.stringify(progress));
+  } catch (error) {
+    console.error('Error saving climbing progress:', error);
+  }
+};
+
+// Get climbing progress
+export const getClimbingProgress = async (): Promise<ClimbingProgress> => {
+  try {
+    const data = await AsyncStorage.getItem(STORAGE_KEYS.CLIMBING_PROGRESS);
+    if (data) {
+      return JSON.parse(data);
+    }
+    return { highestFlash: 'V0', highestAchieved: 'V0', highestAttempted: 'V0' };
+  } catch (error) {
+    console.error('Error getting climbing progress:', error);
+    return { highestFlash: 'V0', highestAchieved: 'V0', highestAttempted: 'V0' };
   }
 };
