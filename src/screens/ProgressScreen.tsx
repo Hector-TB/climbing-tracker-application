@@ -65,11 +65,19 @@ const ProgressScreen: React.FC = () => {
     }, [highestFlash, highestAchieved, highestAttempted])
   );
 
-  const renderGradePicker = (label: string, value: string, setValue: (grade: string) => void) => (
-    <View style={styles.gradePickerColumn}>
-      <Text style={styles.gradePickerLabel}>{label}</Text>
-      <Text style={styles.gradePickerValue}>{value}</Text>
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.gradePickerScroll}>
+  const renderGradePicker = (label: string, value: string, setValue: (grade: string) => void, icon: string) => (
+    <View style={styles.gradePickerRow}>
+      <View style={styles.gradePickerHeader}>
+        <Ionicons name={icon as any} size={18} color={colors.textSecondary} />
+        <Text style={styles.gradePickerLabel}>{label}</Text>
+        <Text style={styles.gradePickerValue}>{value}</Text>
+      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.gradePickerScroll}
+        contentContainerStyle={styles.gradePickerScrollContent}
+      >
         {climbingGrades.map((grade) => (
           <TouchableOpacity
             key={grade}
@@ -115,10 +123,9 @@ const ProgressScreen: React.FC = () => {
       if (metrics) {
         const avg =
           ((metrics.elbowPainWarmup || 0) +
-            (metrics.elbowPainClimbing || 0) +
-            (metrics.elbowPainLockoffs || 0) +
+            (metrics.elbowPainWorkout || 0) +
             (metrics.elbowPainPostSession || 0)) /
-          4;
+          3;
         return Math.round(avg);
       }
       return 0;
@@ -286,10 +293,10 @@ const ProgressScreen: React.FC = () => {
           <Ionicons name="trophy" size={24} color={colors.accent} />
           <Text style={styles.cardTitle}>Climbing Progress</Text>
         </View>
-        <View style={styles.gradePickersRow}>
-          {renderGradePicker('Flash', highestFlash, setHighestFlash)}
-          {renderGradePicker('Achieved', highestAchieved, setHighestAchieved)}
-          {renderGradePicker('Attempted', highestAttempted, setHighestAttempted)}
+        <View style={styles.gradePickersContainer}>
+          {renderGradePicker('Highest Flash', highestFlash, setHighestFlash, 'flash')}
+          {renderGradePicker('Highest Achieved', highestAchieved, setHighestAchieved, 'checkmark-circle')}
+          {renderGradePicker('Highest Attempted', highestAttempted, setHighestAttempted, 'trending-up')}
         </View>
       </Card>
 
@@ -559,42 +566,47 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
     marginTop: -spacing.sm,
   },
-  gradePickersRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    justifyContent: 'space-between',
+  gradePickersContainer: {
+    gap: spacing.md,
   },
-  gradePickerColumn: {
-    flex: 1,
-    alignItems: 'center',
+  gradePickerRow: {
     backgroundColor: colors.backgroundLight,
     borderRadius: borderRadius.md,
     padding: spacing.sm,
   },
-  gradePickerLabel: {
-    fontSize: fontSize.xs,
-    fontWeight: fontWeight.semibold,
-    color: colors.textSecondary,
-    marginBottom: spacing.xs,
-    textAlign: 'center',
-  },
-  gradePickerValue: {
-    fontSize: fontSize.xxl,
-    fontWeight: fontWeight.bold,
-    color: colors.primary,
+  gradePickerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
     marginBottom: spacing.sm,
   },
+  gradePickerLabel: {
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.semibold,
+    color: colors.textSecondary,
+    flex: 1,
+  },
+  gradePickerValue: {
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    color: colors.primary,
+  },
   gradePickerScroll: {
-    maxHeight: 120,
+    marginLeft: -spacing.sm,
+    marginRight: -spacing.sm,
+  },
+  gradePickerScrollContent: {
+    paddingHorizontal: spacing.sm,
+    gap: spacing.xs,
   },
   gradeButton: {
     paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    marginBottom: spacing.xs,
+    paddingHorizontal: spacing.md,
     backgroundColor: colors.background,
     borderRadius: borderRadius.sm,
     alignItems: 'center',
-    minWidth: 40,
+    justifyContent: 'center',
+    minWidth: 50,
   },
   gradeButtonActive: {
     backgroundColor: colors.primary,
