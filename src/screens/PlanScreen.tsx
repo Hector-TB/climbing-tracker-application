@@ -55,8 +55,6 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const startDay = getDay(monthStartDate); // 0 = Sunday
     const emptyCells = startDay === 0 ? 6 : startDay - 1; // Adjust for Monday start
 
-    console.log(`📅 Month ${monthIndex + 1}: startDay=${startDay}, emptyCells=${emptyCells}, totalDays=${daysInMonth.length}, total cells=${emptyCells + daysInMonth.length}`);
-
     return (
       <View style={styles.monthBlock}>
         <View style={styles.monthHeader}>
@@ -101,7 +99,6 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                 activeOpacity={0.7}
                 onPress={() => {
                   const dateString = format(day, 'yyyy-MM-dd');
-                  console.log(`✅ Day ${dayNumber} (${dayOfWeek}) clicked! Navigating to workout for ${dateString}, Week ${weekNumber}`);
                   navigation.navigate('Workout', {
                     date: dateString,
                     day: dayOfWeek,

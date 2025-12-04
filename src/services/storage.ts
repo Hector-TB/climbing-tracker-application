@@ -202,7 +202,6 @@ export const getWorkoutStats = async (): Promise<{
 export const saveClimbingProgress = async (progress: ClimbingProgress): Promise<void> => {
   try {
     await AsyncStorage.setItem(STORAGE_KEYS.CLIMBING_PROGRESS, JSON.stringify(progress));
-    console.log('Climbing progress saved:', progress);
   } catch (error) {
     console.error('Error saving climbing progress:', error);
   }

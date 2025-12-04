@@ -46,7 +46,6 @@ const ProgressScreen: React.FC = () => {
 
   const loadClimbingProgress = async () => {
     const saved = await getClimbingProgress();
-    console.log('Loaded climbing progress:', saved);
     setHighestFlash(saved.highestFlash);
     setHighestAchieved(saved.highestAchieved);
     setHighestAttempted(saved.highestAttempted);
