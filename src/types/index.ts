@@ -42,10 +42,9 @@ export interface WorkoutDay {
 export interface DailyMetrics {
   date: string; // ISO date string
   elbowPainWarmup?: number; // 0-10
-  elbowPainClimbing?: number; // 0-10
-  elbowPainLockoffs?: number; // 0-10
+  elbowPainWorkout?: number; // 0-10
   elbowPainPostSession?: number; // 0-10
-  muscleSoreness?: number; // 1-5
+  muscleSoreness?: number; // 1-5 (1=fresh, 5=very sore)
   energyLevel?: number; // 1-5
   sleepQuality?: number; // 1-5
   motivation?: number; // 1-5

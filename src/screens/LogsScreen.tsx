@@ -23,8 +23,7 @@ const LogsScreen: React.FC = () => {
 
   // Daily Metrics State
   const [elbowPainWarmup, setElbowPainWarmup] = useState(0);
-  const [elbowPainClimbing, setElbowPainClimbing] = useState(0);
-  const [elbowPainLockoffs, setElbowPainLockoffs] = useState(0);
+  const [elbowPainWorkout, setElbowPainWorkout] = useState(0);
   const [elbowPainPost, setElbowPainPost] = useState(0);
   const [muscleSoreness, setMuscleSoreness] = useState(3);
   const [energyLevel, setEnergyLevel] = useState(3);
@@ -47,8 +46,7 @@ const LogsScreen: React.FC = () => {
     const metrics = await getDailyMetrics(dateString);
     if (metrics) {
       setElbowPainWarmup(metrics.elbowPainWarmup || 0);
-      setElbowPainClimbing(metrics.elbowPainClimbing || 0);
-      setElbowPainLockoffs(metrics.elbowPainLockoffs || 0);
+      setElbowPainWorkout(metrics.elbowPainWorkout || 0);
       setElbowPainPost(metrics.elbowPainPostSession || 0);
       setMuscleSoreness(metrics.muscleSoreness || 3);
       setEnergyLevel(metrics.energyLevel || 3);
@@ -58,8 +56,7 @@ const LogsScreen: React.FC = () => {
     } else {
       // Reset to defaults
       setElbowPainWarmup(0);
-      setElbowPainClimbing(0);
-      setElbowPainLockoffs(0);
+      setElbowPainWorkout(0);
       setElbowPainPost(0);
       setMuscleSoreness(3);
       setEnergyLevel(3);
@@ -89,8 +86,7 @@ const LogsScreen: React.FC = () => {
     const metrics: DailyMetrics = {
       date: dateString,
       elbowPainWarmup,
-      elbowPainClimbing,
-      elbowPainLockoffs,
+      elbowPainWorkout,
       elbowPainPostSession: elbowPainPost,
       muscleSoreness,
       energyLevel,
@@ -188,7 +184,7 @@ const LogsScreen: React.FC = () => {
   );
 
   const averageElbowPain = Math.round(
-    (elbowPainWarmup + elbowPainClimbing + elbowPainLockoffs + elbowPainPost) / 4
+    (elbowPainWarmup + elbowPainWorkout + elbowPainPost) / 3
   );
 
   const recoveryScore = muscleSoreness + energyLevel + sleepQuality + motivation;
@@ -274,12 +270,11 @@ const LogsScreen: React.FC = () => {
 
         <Text style={styles.subsectionTitle}>Elbow Pain (0-10 scale)</Text>
         {renderPainSlider('During Warm-up', elbowPainWarmup, setElbowPainWarmup)}
-        {renderPainSlider('During Climbing', elbowPainClimbing, setElbowPainClimbing)}
-        {renderPainSlider('During Lockoffs', elbowPainLockoffs, setElbowPainLockoffs)}
+        {renderPainSlider('During Workout', elbowPainWorkout, setElbowPainWorkout)}
         {renderPainSlider('Post-Session (2hrs)', elbowPainPost, setElbowPainPost)}
 
         <Text style={styles.subsectionTitle}>Recovery Status (1-5 scale)</Text>
-        {renderRatingSlider('Muscle Soreness', muscleSoreness, setMuscleSoreness, 'Very Sore', 'Fresh')}
+        {renderRatingSlider('Muscle Soreness', muscleSoreness, setMuscleSoreness, 'Fresh', 'Very Sore')}
         {renderRatingSlider('Energy Level', energyLevel, setEnergyLevel, 'Exhausted', 'Energized')}
         {renderRatingSlider('Sleep Quality', sleepQuality, setSleepQuality, 'Poor', 'Excellent')}
         {renderRatingSlider('Motivation', motivation, setMotivation, 'Low', 'High')}

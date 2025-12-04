@@ -123,10 +123,9 @@ const ProgressScreen: React.FC = () => {
       if (metrics) {
         const avg =
           ((metrics.elbowPainWarmup || 0) +
-            (metrics.elbowPainClimbing || 0) +
-            (metrics.elbowPainLockoffs || 0) +
+            (metrics.elbowPainWorkout || 0) +
             (metrics.elbowPainPostSession || 0)) /
-          4;
+          3;
         return Math.round(avg);
       }
       return 0;
