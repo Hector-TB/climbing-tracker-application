@@ -15,12 +15,14 @@ const PhaseIndicator: React.FC<PhaseIndicatorProps> = ({ phase, weekNumber, isDe
   const getPhaseColor = () => {
     if (isDeload) return [colors.warning, '#F5D845'];
     switch (phase) {
-      case 'Foundation':
+      case 'Strength Foundation':
         return colors.gradient.secondary;
       case 'Power Development':
         return colors.gradient.primary;
-      case 'Peak Performance':
+      case 'Power Endurance':
         return colors.gradient.purple;
+      case 'Peaking & Performance':
+        return ['#FF6B9D', '#C44569'];
       default:
         return colors.gradient.dark;
     }
@@ -28,12 +30,14 @@ const PhaseIndicator: React.FC<PhaseIndicatorProps> = ({ phase, weekNumber, isDe
 
   const getPhaseWeeks = () => {
     switch (phase) {
-      case 'Foundation':
+      case 'Strength Foundation':
         return 'Weeks 1-4';
       case 'Power Development':
         return 'Weeks 5-8';
-      case 'Peak Performance':
+      case 'Power Endurance':
         return 'Weeks 9-12';
+      case 'Peaking & Performance':
+        return 'Weeks 13-16';
       default:
         return '';
     }

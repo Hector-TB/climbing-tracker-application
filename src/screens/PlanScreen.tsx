@@ -50,9 +50,9 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const monthEndDate = endOfMonth(monthStart);
     const daysInMonth = eachDayOfInterval({ start: monthStartDate, end: monthEndDate });
 
-    // Calculate weeks for this month
-    const weekNumbers = monthIndex === 0 ? [1, 2, 3, 4] : monthIndex === 1 ? [5, 6, 7, 8] : [9, 10, 11, 12];
-    const phase = monthIndex === 0 ? 'Foundation' : monthIndex === 1 ? 'Power Development' : 'Peak Performance';
+    // Calculate weeks for this month (16-week program split into 4 months)
+    const weekNumbers = monthIndex === 0 ? [1, 2, 3, 4] : monthIndex === 1 ? [5, 6, 7, 8] : monthIndex === 2 ? [9, 10, 11, 12] : [13, 14, 15, 16];
+    const phase = monthIndex === 0 ? 'Strength Foundation' : monthIndex === 1 ? 'Power Development' : monthIndex === 2 ? 'Power Endurance' : 'Peaking & Performance';
 
     // Add empty cells for days before month starts
     const startDay = getDay(monthStartDate); // 0 = Sunday
@@ -89,7 +89,7 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             const weekNumber = weekNumbers[dayIndex] || weekNumbers[weekNumbers.length - 1];
             const isWorkoutDay = weeklySchedule.includes(dayOfWeek as any);
             const isCurrentWeek = weekNumber === currentWeek;
-            const isDeloadWeek = weekNumber === 6;
+            const isDeloadWeek = weekNumber === 4 || weekNumber === 8 || weekNumber === 12;
 
             // Check if workout is completed
             const workoutLog = workoutLogs.find(log => log.date === dateString && log.day === dayOfWeek);
@@ -157,11 +157,13 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           gradientColors={
             isDeload
               ? [colors.warning, '#F5D845']
-              : phase === 'Foundation'
+              : phase === 'Strength Foundation'
               ? colors.gradient.secondary
               : phase === 'Power Development'
               ? colors.gradient.primary
-              : colors.gradient.purple
+              : phase === 'Power Endurance'
+              ? colors.gradient.purple
+              : ['#FF6B9D', '#C44569']
           }
         >
           <View style={styles.weekHeader}>
@@ -238,15 +240,23 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               {weekNumber >= 5 && weekNumber <= 8 && (
                 <View style={styles.phaseNote}>
                   <Text style={[styles.phaseNoteText, isCurrent && styles.currentWeekText]}>
-                    📈 Power Development: Campus board work, 2 sets hangboard
+                    📈 Power Development: Weighted max hangs, explosive movements
                   </Text>
                 </View>
               )}
 
-              {weekNumber >= 9 && (
+              {weekNumber >= 9 && weekNumber <= 12 && (
                 <View style={styles.phaseNote}>
                   <Text style={[styles.phaseNoteText, isCurrent && styles.currentWeekText]}>
-                    🎯 Peak Phase: 7/53 hangboard protocol, max campus efforts
+                    💪 Power Endurance: 4×4 protocol, repeaters 7/3
+                  </Text>
+                </View>
+              )}
+
+              {weekNumber >= 13 && (
+                <View style={styles.phaseNote}>
+                  <Text style={[styles.phaseNoteText, isCurrent && styles.currentWeekText]}>
+                    🎯 Peaking: Project V6-V7, send sessions, taper in weeks 15-16
                   </Text>
                 </View>
               )}
@@ -264,7 +274,7 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         contentContainerStyle={styles.contentContainer}
       >
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>12-Week Plan</Text>
+          <Text style={styles.headerTitle}>16-Week Plan</Text>
           <TouchableOpacity
             style={styles.changeWeekButton}
             onPress={() => setModalVisible(true)}
@@ -285,7 +295,7 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           <View style={styles.overviewSection}>
             <View style={styles.overviewItem}>
               <View style={styles.phaseColorBox} style={{ backgroundColor: colors.phase.foundation }} />
-              <Text style={styles.overviewText}>Weeks 1-4: Foundation + Elbow Rehab</Text>
+              <Text style={styles.overviewText}>Weeks 1-4: Strength Foundation</Text>
             </View>
             <View style={styles.overviewItem}>
               <View style={styles.phaseColorBox} style={{ backgroundColor: colors.phase.power }} />
@@ -293,11 +303,15 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             </View>
             <View style={styles.overviewItem}>
               <View style={styles.phaseColorBox} style={{ backgroundColor: colors.phase.peak }} />
-              <Text style={styles.overviewText}>Weeks 9-12: Peak Performance</Text>
+              <Text style={styles.overviewText}>Weeks 9-12: Power Endurance</Text>
+            </View>
+            <View style={styles.overviewItem}>
+              <View style={styles.phaseColorBox} style={{ backgroundColor: '#FF6B9D' }} />
+              <Text style={styles.overviewText}>Weeks 13-16: Peaking & Performance</Text>
             </View>
             <View style={styles.overviewItem}>
               <View style={styles.phaseColorBox} style={{ backgroundColor: colors.warning }} />
-              <Text style={styles.overviewText}>Week 6: Deload Week (Critical!)</Text>
+              <Text style={styles.overviewText}>Deload Weeks: 4, 8, 12 (reduce volume 30%)</Text>
             </View>
           </View>
         </Card>
@@ -309,6 +323,7 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             {renderMonthCalendar(0)}
             {renderMonthCalendar(1)}
             {renderMonthCalendar(2)}
+            {renderMonthCalendar(3)}
           </View>
         </Card>
 
@@ -317,30 +332,30 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           <Text style={styles.sectionSubtitle}>Tap to expand details</Text>
         </View>
 
-        {Array.from({ length: 12 }, (_, i) => i + 1).map(week => renderWeekCard(week))}
+        {Array.from({ length: 16 }, (_, i) => i + 1).map(week => renderWeekCard(week))}
 
         <Card gradient gradientColors={colors.gradient.dark}>
           <View style={styles.goalsContainer}>
             <Text style={styles.goalsTitle}>Expected Outcomes</Text>
             <View style={styles.goalItem}>
               <Ionicons name="trophy" size={20} color={colors.accent} />
-              <Text style={styles.goalText}>Sending V6 consistently</Text>
+              <Text style={styles.goalText}>Sending V7 consistently</Text>
             </View>
             <View style={styles.goalItem}>
               <Ionicons name="trending-up" size={20} color={colors.accent} />
-              <Text style={styles.goalText}>Projecting V7</Text>
+              <Text style={styles.goalText}>V6 feels achievable, regularly getting close on moves</Text>
             </View>
             <View style={styles.goalItem}>
               <Ionicons name="flash" size={20} color={colors.accent} />
-              <Text style={styles.goalText}>Flashing V5</Text>
+              <Text style={styles.goalText}>Flashing V5-V6</Text>
             </View>
             <View style={styles.goalItem}>
-              <Ionicons name="heart" size={20} color={colors.accent} />
-              <Text style={styles.goalText}>Elbow pain reduced to 0-2/10</Text>
+              <Ionicons name="muscle" size={20} color={colors.accent} />
+              <Text style={styles.goalText}>20%+ finger strength gains</Text>
             </View>
             <View style={styles.goalItem}>
               <Ionicons name="fitness" size={20} color={colors.accent} />
-              <Text style={styles.goalText}>10-12 pull-ups, 25-30 push-ups</Text>
+              <Text style={styles.goalText}>Consistent V5 sends, multiple V6 sends</Text>
             </View>
           </View>
         </Card>
@@ -361,7 +376,7 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               </TouchableOpacity>
             </View>
             <ScrollView style={styles.modalScroll}>
-              {Array.from({ length: 12 }, (_, i) => i + 1).map(week => {
+              {Array.from({ length: 16 }, (_, i) => i + 1).map(week => {
                 const { phase, isDeload } = getPhaseInfo(week);
                 return (
                   <TouchableOpacity
