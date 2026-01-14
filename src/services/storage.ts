@@ -23,7 +23,7 @@ export interface ClimbingProgress {
 // Initialize default user progress
 const getDefaultProgress = (): UserProgress => ({
   currentWeek: 1,
-  startDate: new Date().toISOString(),
+  startDate: '2026-01-19T00:00:00.000Z',
   workoutLogs: [],
   dailyMetrics: [],
   climbingMetrics: [],
