@@ -51,7 +51,7 @@ export const getPhaseInfo = (weekNumber: number) => {
 };
 
 export const weeklySchedule: Record<DayOfWeek, string> = {
-  Monday: 'REST DAY',
+  Monday: 'REST DAY + Optional Evening Workout',
   Tuesday: 'Strength Training (5:15-6:45 PM)',
   Wednesday: 'Climbing (11 AM-1 PM)',
   Thursday: 'Climbing with Friend (1-3 PM)',
@@ -76,14 +76,94 @@ const getWorkoutsByPhase = (phase: Phase, isDeload: boolean, weekNumber: number)
 // MONDAY - REST DAY (All Phases)
 // ============================================================================
 const getMondayWorkout = (phase: Phase, isDeload: boolean, weekNumber: number): WorkoutDay => {
+  // Determine evening workout based on week number (rotating pattern)
+  const weekMod = ((weekNumber - 1) % 4) + 1; // 1, 2, 3, or 4
+
+  const eveningWorkoutSection = weekMod === 1 || weekMod === 4 ? {
+    title: 'Optional Evening Home Workout (after class ~9:30 PM) - Week ' + weekNumber,
+    duration: '20 min',
+    exercises: [
+      {
+        id: 'mon6',
+        name: 'If feeling great: 10 min Abrahangs + 10 min mobility',
+        notes: 'Only if energy is high after class and work'
+      },
+      {
+        id: 'mon7',
+        name: 'If tired: 15 min mobility only',
+        notes: 'Gentle stretching and recovery'
+      },
+      {
+        id: 'mon8',
+        name: 'If beat up: Complete rest',
+        notes: 'Listen to your body - rest is training'
+      },
+    ],
+  } : weekMod === 2 ? {
+    title: 'Optional Evening Home Workout (after class ~9:30 PM) - Week ' + weekNumber,
+    duration: '20 min',
+    exercises: [
+      {
+        id: 'mon6',
+        name: 'Abrahangs',
+        duration: 600,
+        notes: '10 min - Light intensity, 40% max'
+      },
+      {
+        id: 'mon7',
+        name: 'Mobility Routine',
+        duration: 600,
+        notes: '10 min - Hips, shoulders, wrists'
+      },
+    ],
+  } : {
+    title: 'Optional Evening Home Workout (after class ~9:30 PM) - Week ' + weekNumber,
+    duration: '25-30 min',
+    exercises: [
+      {
+        id: 'mon6',
+        name: 'Bodyweight Circuit - 5 rounds',
+        notes: 'Minimal rest between exercises'
+      },
+      {
+        id: 'mon7',
+        name: 'Push-ups',
+        sets: 5,
+        reps: 10,
+        notes: 'Part of circuit'
+      },
+      {
+        id: 'mon8',
+        name: 'Bodyweight Squats',
+        sets: 5,
+        reps: 15,
+        notes: 'Part of circuit'
+      },
+      {
+        id: 'mon9',
+        name: 'Plank',
+        sets: 5,
+        duration: 30,
+        notes: 'Part of circuit'
+      },
+      {
+        id: 'mon10',
+        name: 'Glute Bridges',
+        sets: 5,
+        reps: 15,
+        notes: 'Part of circuit'
+      },
+    ],
+  };
+
   return {
     day: 'Monday',
-    title: 'REST DAY',
-    duration: '10 min (optional)',
-    focus: 'Full rest from hard training. Big Data class in evening.',
+    title: 'REST DAY + Optional Evening Workout',
+    duration: '10 min morning (optional) + 20-30 min evening (optional)',
+    focus: 'Full rest from hard training. Big Data class 7:10-9:10 PM. Optional workouts if feeling great.',
     sections: [
       {
-        title: 'Optional Abrahangs (Only if feeling great)',
+        title: 'Morning - Optional Abrahangs (after work ~11 AM)',
         duration: '10 min',
         exercises: [
           {
@@ -125,13 +205,16 @@ const getMondayWorkout = (phase: Phase, isDeload: boolean, weekNumber: number): 
           },
         ],
       },
+      eveningWorkoutSection,
     ],
     importantNotes: [
-      'SKIP Abrahangs if fingers are tired or sore',
-      'This is a FULL REST DAY - only do Abrahangs if you feel 100%',
+      'Morning Abrahangs: SKIP if fingers are tired or sore',
+      'Evening workout: COMPLETELY OPTIONAL - skip if tired from class or work',
       'Big Data class 7:10-9:10 PM',
+      'This is primarily a REST DAY - recovery is critical',
+      'Rotating schedule: Week ' + weekNumber + (weekMod === 1 || weekMod === 4 ? ' (flexible)' : weekMod === 2 ? ' (Abrahangs + mobility)' : ' (bodyweight circuit)'),
     ],
-    lowEnergyVariant: 'Complete rest - no Abrahangs',
+    lowEnergyVariant: 'Complete rest - no morning Abrahangs, no evening workout',
   };
 };
 
