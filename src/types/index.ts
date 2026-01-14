@@ -2,7 +2,7 @@
 
 export type DayOfWeek = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
 
-export type Phase = 'Foundation' | 'Power Development' | 'Peak Performance';
+export type Phase = 'Strength Foundation' | 'Power Development' | 'Power Endurance' | 'Peaking & Performance';
 
 export interface WeekInfo {
   weekNumber: number;

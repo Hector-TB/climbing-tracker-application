@@ -6,6 +6,7 @@ import {
   ClimbingMetrics,
   MonthlyBenchmark,
 } from '../types';
+import { PROGRAM_START_DATE } from '../data/trainingPlan';
 
 const STORAGE_KEYS = {
   USER_PROGRESS: '@climbing_tracker:user_progress',
@@ -23,7 +24,7 @@ export interface ClimbingProgress {
 // Initialize default user progress
 const getDefaultProgress = (): UserProgress => ({
   currentWeek: 1,
-  startDate: new Date().toISOString(),
+  startDate: PROGRAM_START_DATE,
   workoutLogs: [],
   dailyMetrics: [],
   climbingMetrics: [],
