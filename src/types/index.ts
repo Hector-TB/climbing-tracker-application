@@ -39,15 +39,24 @@ export interface WorkoutDay {
   lowEnergyVariant?: string;
 }
 
+export interface WeeklyMetrics {
+  date: string; // ISO date string (Monday of the week)
+  weekNumber: number;
+  fingerboardSessionsCompleted: number;
+  dailyMobilityStreak: number; // days
+  energyLevel: number; // 1-10
+  fingerElbowSoreness: number; // 1-10 (1=none, 10=severe)
+  sleepQuality: number; // 1-10
+  motivationLevel: number; // 1-10
+  hasSharpPain: boolean;
+  sharpPainLocation?: string;
+  hasDullAche: boolean;
+  dullAcheLocation?: string;
+  notes?: string;
+}
+
 export interface DailyMetrics {
   date: string; // ISO date string
-  elbowPainWarmup?: number; // 0-10
-  elbowPainWorkout?: number; // 0-10
-  elbowPainPostSession?: number; // 0-10
-  muscleSoreness?: number; // 1-5 (1=fresh, 5=very sore)
-  energyLevel?: number; // 1-5
-  sleepQuality?: number; // 1-5
-  motivation?: number; // 1-5
   notes?: string;
 }
 
@@ -72,23 +81,25 @@ export interface ClimbingMetrics {
 }
 
 export interface MonthlyBenchmark {
-  month: number; // 1-3
-  date: string;
-  hardestSent: string;
-  hardestFlashed: string;
+  weekNumber: number; // 4, 8, 12, or 16
+  date: string; // ISO date string (deload Monday)
+  // Fingerboard Strength Test: 20mm edge, half-crimp, max hang
+  hangboardMaxHangSeconds: number;
+  hangboardAddedWeight: number; // lbs
+  // Climbing Performance
+  highestGradeSent: string; // e.g., "V5"
+  highestGradeFlashed: string; // e.g., "V4"
+  // Pull-up Max
   maxPullUps: number;
-  maxPushUps: number;
-  hangboardMaxWeight: number;
-  campusHighestRung: number;
-  compressionHangTime: number;
-  elbowPainAverage: number;
-  bodyWeight: number;
+  pullUpAddedWeight: number; // lbs
+  notes?: string;
 }
 
 export interface UserProgress {
   currentWeek: number;
   startDate: string;
   workoutLogs: WorkoutLog[];
+  weeklyMetrics: WeeklyMetrics[];
   dailyMetrics: DailyMetrics[];
   climbingMetrics: ClimbingMetrics[];
   monthlyBenchmarks: MonthlyBenchmark[];
