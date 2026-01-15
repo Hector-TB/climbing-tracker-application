@@ -20,6 +20,7 @@ import { WorkoutLog } from '../types';
 
 const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [currentWeek, setCurrentWeek] = useState(1);
+  const [viewingWeek, setViewingWeek] = useState(1);
   const [expandedWeek, setExpandedWeek] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([]);
@@ -33,12 +34,19 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const loadCurrentWeek = async () => {
     const progress = await getUserProgress();
     setCurrentWeek(progress.currentWeek);
+    setViewingWeek(progress.currentWeek);
     setWorkoutLogs(progress.workoutLogs);
   };
 
-  const handleChangeWeek = async (week: number) => {
+  const handleViewWeek = (week: number) => {
+    setViewingWeek(week);
+    setModalVisible(false);
+  };
+
+  const handleSetAsCurrentWeek = async (week: number) => {
     await updateCurrentWeek(week);
     setCurrentWeek(week);
+    setViewingWeek(week);
     setModalVisible(false);
   };
 
@@ -89,6 +97,7 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             const weekNumber = weekNumbers[dayIndex] || weekNumbers[weekNumbers.length - 1];
             const isWorkoutDay = weeklySchedule.includes(dayOfWeek as any);
             const isCurrentWeek = weekNumber === currentWeek;
+            const isViewingWeek = weekNumber === viewingWeek;
             const isDeloadWeek = weekNumber === 4 || weekNumber === 8 || weekNumber === 12;
 
             // Check if workout is completed
@@ -102,6 +111,7 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                   styles.calendarDay,
                   styles.calendarDayActive,
                   isCurrentWeek && styles.calendarDayCurrentWeek,
+                  isViewingWeek && !isCurrentWeek && styles.calendarDayViewingWeek,
                   isDeloadWeek && styles.calendarDayDeload,
                 ]}
                 activeOpacity={0.7}
@@ -144,15 +154,23 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const { phase, isDeload } = getPhaseInfo(weekNumber);
     const isExpanded = expandedWeek === weekNumber;
     const isCurrent = weekNumber === currentWeek;
+    const isViewing = weekNumber === viewingWeek;
 
     return (
       <TouchableOpacity
         key={weekNumber}
-        onPress={() => setExpandedWeek(isExpanded ? null : weekNumber)}
+        onPress={() => {
+          setViewingWeek(weekNumber);
+          setExpandedWeek(isExpanded ? null : weekNumber);
+        }}
         activeOpacity={0.7}
       >
         <Card
-          style={[styles.weekCard, isCurrent && styles.currentWeekCard]}
+          style={[
+            styles.weekCard,
+            isCurrent && styles.currentWeekCard,
+            isViewing && !isCurrent && styles.viewingWeekCard,
+          ]}
           gradient={isCurrent}
           gradientColors={
             isDeload
@@ -174,6 +192,11 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
               {isCurrent && (
                 <View style={styles.currentBadge}>
                   <Text style={styles.currentBadgeText}>CURRENT</Text>
+                </View>
+              )}
+              {isViewing && !isCurrent && (
+                <View style={styles.viewingBadge}>
+                  <Text style={styles.viewingBadgeText}>VIEWING</Text>
                 </View>
               )}
               {isDeload && (
@@ -285,10 +308,27 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         </View>
 
         <PhaseIndicator
-          phase={getPhaseInfo(currentWeek).phase}
-          weekNumber={currentWeek}
-          isDeload={getPhaseInfo(currentWeek).isDeload}
+          phase={getPhaseInfo(viewingWeek).phase}
+          weekNumber={viewingWeek}
+          isDeload={getPhaseInfo(viewingWeek).isDeload}
         />
+
+        {viewingWeek !== currentWeek && (
+          <Card style={styles.viewingWeekBanner}>
+            <View style={styles.viewingWeekContent}>
+              <Ionicons name="eye-outline" size={20} color={colors.info} />
+              <Text style={styles.viewingWeekText}>
+                Viewing Week {viewingWeek} (You're currently on Week {currentWeek})
+              </Text>
+              <TouchableOpacity
+                style={styles.backToCurrentButton}
+                onPress={() => setViewingWeek(currentWeek)}
+              >
+                <Text style={styles.backToCurrentText}>Back to Current</Text>
+              </TouchableOpacity>
+            </View>
+          </Card>
+        )}
 
         <Card>
           <Text style={styles.cardTitle}>Plan Overview</Text>
@@ -370,7 +410,7 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Week</Text>
+              <Text style={styles.modalTitle}>View Week</Text>
               <TouchableOpacity onPress={() => setModalVisible(false)}>
                 <Ionicons name="close" size={28} color={colors.text} />
               </TouchableOpacity>
@@ -383,14 +423,26 @@ const PlanScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
                     key={week}
                     style={[
                       styles.modalWeekItem,
-                      week === currentWeek && styles.modalWeekItemActive,
+                      week === viewingWeek && styles.modalWeekItemActive,
                     ]}
-                    onPress={() => handleChangeWeek(week)}
+                    onPress={() => handleViewWeek(week)}
+                    onLongPress={() => {
+                      if (week !== currentWeek) {
+                        handleSetAsCurrentWeek(week);
+                      }
+                    }}
                   >
-                    <Text style={styles.modalWeekNumber}>Week {week}</Text>
-                    <Text style={styles.modalWeekPhase}>
-                      {isDeload ? 'DELOAD' : phase}
-                    </Text>
+                    <View style={styles.modalWeekTextContainer}>
+                      <Text style={styles.modalWeekNumber}>Week {week}</Text>
+                      <Text style={styles.modalWeekPhase}>
+                        {isDeload ? 'DELOAD' : phase}
+                      </Text>
+                    </View>
+                    {week === currentWeek && (
+                      <View style={styles.modalCurrentBadge}>
+                        <Text style={styles.modalCurrentBadgeText}>CURRENT</Text>
+                      </View>
+                    )}
                   </TouchableOpacity>
                 );
               })}
@@ -726,6 +778,66 @@ const styles = StyleSheet.create({
   },
   completedIcon: {
     marginTop: 2,
+  },
+  viewingWeekBanner: {
+    marginBottom: spacing.md,
+    backgroundColor: colors.info + '20', // 20 is opacity in hex
+  },
+  viewingWeekContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  viewingWeekText: {
+    flex: 1,
+    fontSize: fontSize.sm,
+    color: colors.text,
+    fontWeight: fontWeight.medium,
+  },
+  backToCurrentButton: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    backgroundColor: colors.primary,
+    borderRadius: borderRadius.sm,
+  },
+  backToCurrentText: {
+    fontSize: fontSize.xs,
+    color: colors.white,
+    fontWeight: fontWeight.semibold,
+  },
+  viewingWeekCard: {
+    borderWidth: 2,
+    borderColor: colors.info,
+  },
+  viewingBadge: {
+    backgroundColor: colors.info,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: borderRadius.sm,
+  },
+  viewingBadgeText: {
+    fontSize: fontSize.xs,
+    color: colors.white,
+    fontWeight: fontWeight.bold,
+  },
+  calendarDayViewingWeek: {
+    backgroundColor: colors.info + '60', // 60 is opacity in hex
+    borderWidth: 1,
+    borderColor: colors.info,
+  },
+  modalWeekTextContainer: {
+    flex: 1,
+  },
+  modalCurrentBadge: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: borderRadius.sm,
+  },
+  modalCurrentBadgeText: {
+    fontSize: fontSize.xs,
+    color: colors.white,
+    fontWeight: fontWeight.bold,
   },
 });
 
