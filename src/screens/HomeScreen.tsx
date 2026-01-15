@@ -14,7 +14,7 @@ import { spacing, fontSize, fontWeight, borderRadius } from '../theme/spacing';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import PhaseIndicator from '../components/PhaseIndicator';
-import { getUserProgress, getWorkoutStats } from '../services/storage';
+import { getUserProgress, getWorkoutStats, getWeeklyMetrics } from '../services/storage';
 import { getWorkoutForWeek, getPhaseInfo, weeklySchedule } from '../data/trainingPlan';
 import { format, startOfWeek, addDays } from 'date-fns';
 
@@ -24,6 +24,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [todayWorkout, setTodayWorkout] = useState<any>(null);
   const [workoutLogs, setWorkoutLogs] = useState<any[]>([]);
+  const [weeklyMetrics, setWeeklyMetrics] = useState<any>(null);
 
   const loadData = async () => {
     const progress = await getUserProgress();
@@ -37,6 +38,10 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     const dayName = format(today, 'EEEE') as any;
     const workout = getWorkoutForWeek(progress.currentWeek, dayName);
     setTodayWorkout({ ...workout, date: format(today, 'yyyy-MM-dd') });
+
+    // Load weekly metrics
+    const metrics = await getWeeklyMetrics(progress.currentWeek);
+    setWeeklyMetrics(metrics);
   };
 
   useFocusEffect(
@@ -128,7 +133,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     >
       <View style={styles.header}>
         <Text style={styles.greeting}>Welcome Back, Hector!</Text>
-        <Text style={styles.subtitle}>V5 → V7 Progression Plan</Text>
+        <Text style={styles.subtitle}>V4 → V7 Bouldering (16 weeks)</Text>
       </View>
 
       <PhaseIndicator phase={phase} weekNumber={currentWeek} isDeload={isDeload} />
@@ -140,7 +145,7 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             <View style={styles.deloadTextContainer}>
               <Text style={styles.deloadTitle}>Deload Week</Text>
               <Text style={styles.deloadText}>
-                Reduce volume to 50-60%. Focus on recovery and technique.
+                Reduce volume by 30%. Maintain intensity, focus on recovery.
               </Text>
             </View>
           </View>
@@ -166,11 +171,70 @@ const HomeScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{currentWeek}/12</Text>
+            <Text style={styles.statValue}>{currentWeek}/16</Text>
             <Text style={styles.statLabel}>Weeks</Text>
           </View>
         </View>
       </Card>
+
+      {weeklyMetrics && (
+        <Card>
+          <View style={styles.statsHeader}>
+            <Text style={styles.cardTitle}>This Week's Metrics</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Logs')}>
+              <Text style={styles.seeAllText}>Update</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.metricsGrid}>
+            <View style={styles.metricItem}>
+              <View style={styles.metricIconContainer}>
+                <Ionicons name="fitness" size={20} color={colors.primary} />
+              </View>
+              <Text style={styles.metricValue}>{weeklyMetrics.fingerboardSessionsCompleted}</Text>
+              <Text style={styles.metricLabel}>Fingerboard</Text>
+            </View>
+            <View style={styles.metricItem}>
+              <View style={styles.metricIconContainer}>
+                <Ionicons name="body" size={20} color={colors.secondary} />
+              </View>
+              <Text style={styles.metricValue}>{weeklyMetrics.dailyMobilityStreak}</Text>
+              <Text style={styles.metricLabel}>Mobility Days</Text>
+            </View>
+            <View style={styles.metricItem}>
+              <View style={styles.metricIconContainer}>
+                <Ionicons name="flash" size={20} color={colors.accent} />
+              </View>
+              <Text style={styles.metricValue}>{weeklyMetrics.energyLevel}/10</Text>
+              <Text style={styles.metricLabel}>Energy</Text>
+            </View>
+            <View style={styles.metricItem}>
+              <View style={[
+                styles.metricIconContainer,
+                weeklyMetrics.fingerElbowSoreness >= 8 && styles.metricIconDanger
+              ]}>
+                <Ionicons
+                  name="hand-right"
+                  size={20}
+                  color={weeklyMetrics.fingerElbowSoreness >= 8 ? colors.error : colors.success}
+                />
+              </View>
+              <Text style={[
+                styles.metricValue,
+                weeklyMetrics.fingerElbowSoreness >= 8 && styles.metricValueDanger
+              ]}>
+                {weeklyMetrics.fingerElbowSoreness}/10
+              </Text>
+              <Text style={styles.metricLabel}>Soreness</Text>
+            </View>
+          </View>
+          {weeklyMetrics.hasSharpPain && (
+            <View style={styles.alertBanner}>
+              <Ionicons name="warning" size={16} color={colors.error} />
+              <Text style={styles.alertText}>Sharp pain reported - review in Logs</Text>
+            </View>
+          )}
+        </Card>
+      )}
 
       <Card>
         <Text style={styles.cardTitle}>This Week's Schedule</Text>
@@ -409,6 +473,57 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     color: colors.text,
     marginTop: spacing.sm,
+    fontWeight: fontWeight.medium,
+  },
+  metricsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: spacing.sm,
+  },
+  metricItem: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: spacing.xs,
+  },
+  metricIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.backgroundLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+  },
+  metricIconDanger: {
+    backgroundColor: '#FFE5E5',
+  },
+  metricValue: {
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
+    marginBottom: spacing.xxs,
+  },
+  metricValueDanger: {
+    color: colors.error,
+  },
+  metricLabel: {
+    fontSize: fontSize.xs,
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  alertBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFE5E5',
+    padding: spacing.sm,
+    borderRadius: borderRadius.sm,
+    marginTop: spacing.md,
+  },
+  alertText: {
+    fontSize: fontSize.sm,
+    color: colors.error,
+    marginLeft: spacing.xs,
+    flex: 1,
     fontWeight: fontWeight.medium,
   },
 });

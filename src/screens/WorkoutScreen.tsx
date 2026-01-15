@@ -229,6 +229,18 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ route, navigation }) => {
         contentContainerStyle={styles.contentContainer}
       >
         <Card gradient gradientColors={colors.gradient.primary}>
+          <View style={styles.headerBadges}>
+            <View style={styles.phaseBadge}>
+              <Text style={styles.phaseBadgeText}>
+                Week {weekNumber} • {phase}
+              </Text>
+            </View>
+            {isDeload && (
+              <View style={styles.deloadBadge}>
+                <Text style={styles.deloadBadgeText}>DELOAD</Text>
+              </View>
+            )}
+          </View>
           <Text style={styles.dayName}>{day}</Text>
           <Text style={styles.workoutTitle}>{workout.title}</Text>
           <Text style={styles.workoutFocus}>{workout.focus}</Text>
@@ -277,27 +289,33 @@ const WorkoutScreen: React.FC<WorkoutScreenProps> = ({ route, navigation }) => {
             </Text>
           </View>
 
-          <View style={styles.lowEnergyContainer}>
-            <View style={styles.lowEnergyLeft}>
-              <Ionicons name="battery-half-outline" size={24} color={colors.warning} />
-              <View style={styles.lowEnergyTextContainer}>
-                <Text style={styles.lowEnergyTitle}>Low Energy Variant</Text>
-                <Text style={styles.lowEnergySubtitle}>Reduce volume by 40%</Text>
+          {workout.lowEnergyVariant && (
+            <>
+              <View style={styles.lowEnergyContainer}>
+                <View style={styles.lowEnergyLeft}>
+                  <Ionicons name="battery-half-outline" size={24} color={colors.warning} />
+                  <View style={styles.lowEnergyTextContainer}>
+                    <Text style={styles.lowEnergyTitle}>Low Energy Mode</Text>
+                    <Text style={styles.lowEnergySubtitle}>
+                      {isDeload ? 'Deload week: reduced volume' : 'Adjust if tired/sore'}
+                    </Text>
+                  </View>
+                </View>
+                <Switch
+                  value={useLowEnergy}
+                  onValueChange={setUseLowEnergy}
+                  trackColor={{ false: colors.grayDark, true: colors.primary }}
+                  thumbColor={useLowEnergy ? colors.white : colors.grayLight}
+                />
               </View>
-            </View>
-            <Switch
-              value={useLowEnergy}
-              onValueChange={setUseLowEnergy}
-              trackColor={{ false: colors.grayDark, true: colors.primary }}
-              thumbColor={useLowEnergy ? colors.white : colors.grayLight}
-            />
-          </View>
 
-          {useLowEnergy && workout.lowEnergyVariant && (
-            <View style={styles.variantInfo}>
-              <Ionicons name="information-circle" size={16} color={colors.info} />
-              <Text style={styles.variantText}>{workout.lowEnergyVariant}</Text>
-            </View>
+              {useLowEnergy && (
+                <View style={styles.variantInfo}>
+                  <Ionicons name="information-circle" size={16} color={colors.info} />
+                  <Text style={styles.variantText}>{workout.lowEnergyVariant}</Text>
+                </View>
+              )}
+            </>
           )}
         </Card>
 
@@ -352,6 +370,36 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: spacing.md,
     paddingBottom: 100,
+  },
+  headerBadges: {
+    flexDirection: 'row',
+    marginBottom: spacing.sm,
+    gap: spacing.xs,
+  },
+  phaseBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
+  },
+  phaseBadgeText: {
+    fontSize: fontSize.xs,
+    color: colors.white,
+    fontWeight: fontWeight.semibold,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  deloadBadge: {
+    backgroundColor: colors.warning,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.sm,
+  },
+  deloadBadgeText: {
+    fontSize: fontSize.xs,
+    color: colors.white,
+    fontWeight: fontWeight.bold,
+    letterSpacing: 0.5,
   },
   dayName: {
     fontSize: fontSize.sm,

@@ -3,6 +3,7 @@ import {
   UserProgress,
   WorkoutLog,
   DailyMetrics,
+  WeeklyMetrics,
   ClimbingMetrics,
   MonthlyBenchmark,
 } from '../types';
@@ -26,6 +27,7 @@ const getDefaultProgress = (): UserProgress => ({
   currentWeek: 1,
   startDate: PROGRAM_START_DATE,
   workoutLogs: [],
+  weeklyMetrics: [],
   dailyMetrics: [],
   climbingMetrics: [],
   monthlyBenchmarks: [],
@@ -139,11 +141,38 @@ export const addClimbingMetrics = async (metrics: ClimbingMetrics): Promise<void
   }
 };
 
+// Add weekly metrics
+export const addWeeklyMetrics = async (metrics: WeeklyMetrics): Promise<void> => {
+  try {
+    const progress = await getUserProgress();
+    const existingIndex = progress.weeklyMetrics.findIndex((m) => m.weekNumber === metrics.weekNumber);
+    if (existingIndex >= 0) {
+      progress.weeklyMetrics[existingIndex] = metrics;
+    } else {
+      progress.weeklyMetrics.push(metrics);
+    }
+    await saveUserProgress(progress);
+  } catch (error) {
+    console.error('Error adding weekly metrics:', error);
+  }
+};
+
+// Get weekly metrics for week
+export const getWeeklyMetrics = async (weekNumber: number): Promise<WeeklyMetrics | null> => {
+  try {
+    const progress = await getUserProgress();
+    return progress.weeklyMetrics.find((m) => m.weekNumber === weekNumber) || null;
+  } catch (error) {
+    console.error('Error getting weekly metrics:', error);
+    return null;
+  }
+};
+
 // Add monthly benchmark
 export const addMonthlyBenchmark = async (benchmark: MonthlyBenchmark): Promise<void> => {
   try {
     const progress = await getUserProgress();
-    const existingIndex = progress.monthlyBenchmarks.findIndex((b) => b.month === benchmark.month);
+    const existingIndex = progress.monthlyBenchmarks.findIndex((b) => b.weekNumber === benchmark.weekNumber);
     if (existingIndex >= 0) {
       progress.monthlyBenchmarks[existingIndex] = benchmark;
     } else {
@@ -152,6 +181,17 @@ export const addMonthlyBenchmark = async (benchmark: MonthlyBenchmark): Promise<
     await saveUserProgress(progress);
   } catch (error) {
     console.error('Error adding monthly benchmark:', error);
+  }
+};
+
+// Get monthly benchmark for week
+export const getMonthlyBenchmark = async (weekNumber: number): Promise<MonthlyBenchmark | null> => {
+  try {
+    const progress = await getUserProgress();
+    return progress.monthlyBenchmarks.find((b) => b.weekNumber === weekNumber) || null;
+  } catch (error) {
+    console.error('Error getting monthly benchmark:', error);
+    return null;
   }
 };
 
